@@ -1,0 +1,61 @@
+{
+  "version": "webuntis-homework-2026-08-30-v3",
+  "rules": [
+    {
+      "path": "data.homeworks[].id",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].date",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].dueDate",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].lessonId",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].text",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].remark",
+      "mode": "type"
+    },
+    {
+      "path": "data.homeworks[].completed",
+      "mode": "type"
+    },
+    {
+      "path": "data.lessons[].id",
+      "mode": "type"
+    },
+    {
+      "path": "data.lessons[].subject",
+      "mode": "type"
+    },
+    {
+      "path": "data.lessons[].lessonType",
+      "mode": "type"
+    },
+    {
+      "path": "data.records[].homeworkId",
+      "mode": "type"
+    },
+    {
+      "path": "data.records[].teacherId",
+      "mode": "type"
+    },
+    {
+      "path": "data.records[].elementIds[]",
+      "mode": "type"
+    },
+    {
+      "path": "data.teachers[].id",
+      "mode": "type"
+    }
+  ]
+}

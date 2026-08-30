@@ -1,0 +1,204 @@
+{
+  "capture_format": 1,
+  "platform": "webuntis",
+  "allowlist_version": "webuntis-homework-2026-08-30-v3",
+  "captured_at": "2026-08-30T14:10:22Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/WebUntis/api/homeworks/lessons?startDate={startDate}&endDate={endDate}",
+      "status": 200,
+      "shape": {
+        "data": {
+          "homeworks": [
+            {
+              "completed": {
+                "__t": "bool"
+              },
+              "date": {
+                "__t": "int"
+              },
+              "dueDate": {
+                "__t": "int"
+              },
+              "id": {
+                "__t": "int"
+              },
+              "lessonId": {
+                "__t": "int"
+              },
+              "remark": {
+                "__t": "string",
+                "__len": 0
+              },
+              "text": {
+                "__t": "string",
+                "__len": 13
+              }
+            },
+            {
+              "completed": {
+                "__t": "bool"
+              },
+              "date": {
+                "__t": "int"
+              },
+              "dueDate": {
+                "__t": "int"
+              },
+              "id": {
+                "__t": "int"
+              },
+              "lessonId": {
+                "__t": "int"
+              },
+              "remark": {
+                "__t": "string",
+                "__len": 0
+              },
+              "text": {
+                "__t": "string",
+                "__len": 18
+              }
+            },
+            {
+              "completed": {
+                "__t": "bool"
+              },
+              "date": {
+                "__t": "int"
+              },
+              "dueDate": {
+                "__t": "int"
+              },
+              "id": {
+                "__t": "int"
+              },
+              "lessonId": {
+                "__t": "int"
+              },
+              "remark": {
+                "__t": "string",
+                "__len": 0
+              },
+              "text": {
+                "__t": "string",
+                "__len": 138
+              }
+            }
+          ],
+          "lessons": [
+            {
+              "id": {
+                "__t": "int"
+              },
+              "lessonType": {
+                "__t": "string",
+                "__len": 10
+              },
+              "subject": {
+                "__t": "string",
+                "__len": 0
+              }
+            },
+            {
+              "id": {
+                "__t": "int"
+              },
+              "lessonType": {
+                "__t": "string",
+                "__len": 10
+              },
+              "subject": {
+                "__t": "string",
+                "__len": 0
+              }
+            },
+            {
+              "id": {
+                "__t": "int"
+              },
+              "lessonType": {
+                "__t": "string",
+                "__len": 0
+              },
+              "subject": {
+                "__t": "string",
+                "__len": 0
+              }
+            }
+          ],
+          "records": [
+            {
+              "elementIds": [
+                {
+                  "__t": "int"
+                }
+              ],
+              "homeworkId": {
+                "__t": "int"
+              },
+              "teacherId": {
+                "__t": "int"
+              }
+            },
+            {
+              "elementIds": [
+                {
+                  "__t": "int"
+                }
+              ],
+              "homeworkId": {
+                "__t": "int"
+              },
+              "teacherId": {
+                "__t": "int"
+              }
+            },
+            {
+              "elementIds": [
+                {
+                  "__t": "int"
+                }
+              ],
+              "homeworkId": {
+                "__t": "int"
+              },
+              "teacherId": {
+                "__t": "int"
+              }
+            }
+          ],
+          "teachers": [
+            {
+              "id": {
+                "__t": "int"
+              }
+            },
+            {
+              "id": {
+                "__t": "int"
+              }
+            },
+            {
+              "id": {
+                "__t": "int"
+              }
+            }
+          ]
+        }
+      },
+      "dropped_paths": [
+        "data.homeworks[].attachments",
+        "data.teachers[].name"
+      ],
+      "array_lengths": {
+        "data.homeworks": 8,
+        "data.lessons": 24,
+        "data.records": 8,
+        "data.records[].elementIds": 1,
+        "data.teachers": 6
+      }
+    }
+  ]
+}
