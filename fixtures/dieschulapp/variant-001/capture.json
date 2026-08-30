@@ -1,0 +1,235 @@
+{
+  "capture_format": 1,
+  "platform": "dieschulapp",
+  "allowlist_version": "dieschulapp-timetable-2026-08-30-v1",
+  "captured_at": "2026-08-30T14:38:31Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/api/1.0/current-timetable/?date={date}&week=true&substitutions=false",
+      "status": 200,
+      "shape": {
+        "students": [
+          {
+            "entries": [
+              {
+                "courseSubject": {
+                  "course": {
+                    "type": {
+                      "__t": "string",
+                      "__len": 5
+                    }
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "subject": {
+                    "acronym": {
+                      "__t": "string",
+                      "__len": 1
+                    },
+                    "hexColor": {
+                      "__t": "string",
+                      "__len": 7
+                    },
+                    "id": {
+                      "__t": "int"
+                    },
+                    "name": {
+                      "__t": "string",
+                      "__len": 10
+                    }
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "timeTableSlot": {
+                  "endTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "name": {
+                    "__t": "string",
+                    "__len": 9
+                  },
+                  "number": {
+                    "__t": "int"
+                  },
+                  "startTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "timetableBlock": {
+                  "__t": "null"
+                },
+                "weekday": {
+                  "__t": "int"
+                }
+              },
+              {
+                "courseSubject": {
+                  "course": {
+                    "type": {
+                      "__t": "string",
+                      "__len": 5
+                    }
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "subject": {
+                    "acronym": {
+                      "__t": "string",
+                      "__len": 2
+                    },
+                    "hexColor": {
+                      "__t": "string",
+                      "__len": 7
+                    },
+                    "id": {
+                      "__t": "int"
+                    },
+                    "name": {
+                      "__t": "string",
+                      "__len": 14
+                    }
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "timeTableSlot": {
+                  "endTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "name": {
+                    "__t": "string",
+                    "__len": 9
+                  },
+                  "number": {
+                    "__t": "int"
+                  },
+                  "startTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "timetableBlock": {
+                  "__t": "null"
+                },
+                "weekday": {
+                  "__t": "int"
+                }
+              },
+              {
+                "courseSubject": {
+                  "course": {
+                    "type": {
+                      "__t": "string",
+                      "__len": 5
+                    }
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "subject": {
+                    "acronym": {
+                      "__t": "string",
+                      "__len": 1
+                    },
+                    "hexColor": {
+                      "__t": "string",
+                      "__len": 7
+                    },
+                    "id": {
+                      "__t": "int"
+                    },
+                    "name": {
+                      "__t": "string",
+                      "__len": 7
+                    }
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "timeTableSlot": {
+                  "endTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "name": {
+                    "__t": "string",
+                    "__len": 9
+                  },
+                  "number": {
+                    "__t": "int"
+                  },
+                  "startTime": {
+                    "__t": "string",
+                    "__len": 5
+                  },
+                  "type": {
+                    "__t": "string",
+                    "__len": 6
+                  }
+                },
+                "timetableBlock": {
+                  "__t": "null"
+                },
+                "weekday": {
+                  "__t": "int"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "dropped_paths": [
+        "students[].entries[].courseSubject.course.externalId",
+        "students[].entries[].courseSubject.course.id",
+        "students[].entries[].courseSubject.course.name",
+        "students[].entries[].courseSubject.teachers",
+        "students[].entries[].room",
+        "students[].student",
+        "vacations"
+      ],
+      "array_lengths": {
+        "students": 1,
+        "students[].entries": 38
+      }
+    }
+  ]
+}

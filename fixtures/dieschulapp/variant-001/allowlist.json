@@ -1,0 +1,69 @@
+{
+  "version": "dieschulapp-timetable-2026-08-30-v1",
+  "rules": [
+    {
+      "path": "students[].entries[].id",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].weekday",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timetableBlock",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.id",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.type",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.subject.id",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.subject.name",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.subject.acronym",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.subject.hexColor",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].courseSubject.course.type",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.id",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.name",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.number",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.type",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.startTime",
+      "mode": "type"
+    },
+    {
+      "path": "students[].entries[].timeTableSlot.endTime",
+      "mode": "type"
+    }
+  ]
+}
