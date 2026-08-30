@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Privacy-safe structural capture and redaction tooling.",
   "scripts": {
-    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "capture": "npm run build && node dist/cli.js",
+    "test": "npm run build && vitest run",
     "typecheck": "tsc --noEmit"
   }
 }

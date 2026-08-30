@@ -1,0 +1,39 @@
+{
+  "id": "EXAMPLE_ID_009",
+  "term": "EXAMPLE_TERM_2025",
+  "pupil": {
+    "displayName": "EXAMPLE_PUPIL_ONE"
+  },
+  "teacher": {
+    "name": "EXAMPLE_TEACHER_ALPHA"
+  },
+  "note": "EXAMPLE_PRIVATE_NOTE_42",
+  "secret": {
+    "deep": "EXAMPLE_NESTED_SECRET_7"
+  },
+  "unlisted": {
+    "token": "EXAMPLE_BEARER_TOKEN_99"
+  },
+  "items": [
+    {
+      "code": "ITEM_EXAMPLE_A",
+      "pin": "ITEM_EXAMPLE_PIN_1"
+    },
+    {
+      "code": "ITEM_EXAMPLE_B",
+      "pin": "ITEM_EXAMPLE_PIN_2"
+    },
+    {
+      "code": "ITEM_EXAMPLE_C",
+      "pin": "ITEM_EXAMPLE_PIN_3"
+    },
+    {
+      "code": "ITEM_EXAMPLE_D",
+      "pin": "ITEM_EXAMPLE_PIN_4"
+    },
+    {
+      "code": "ITEM_EXAMPLE_E",
+      "pin": "ITEM_EXAMPLE_PIN_5"
+    }
+  ]
+}

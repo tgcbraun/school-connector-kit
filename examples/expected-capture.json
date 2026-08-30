@@ -1,0 +1,42 @@
+{
+  "capture_format": 1,
+  "platform": "example",
+  "allowlist_version": "example-1",
+  "captured_at": "2025-06-15T08:30:00Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/api/example?start={start}&end={end}",
+      "status": 200,
+      "shape": {
+        "id": "EXAMPLE_ID_009",
+        "items": [
+          {
+            "code": "ITEM_EXAMPLE_A"
+          },
+          {
+            "code": "ITEM_EXAMPLE_B"
+          },
+          {
+            "code": "ITEM_EXAMPLE_C"
+          }
+        ],
+        "term": {
+          "__t": "string",
+          "__len": 17
+        }
+      },
+      "dropped_paths": [
+        "items[].pin",
+        "note",
+        "pupil",
+        "secret",
+        "teacher",
+        "unlisted"
+      ],
+      "array_lengths": {
+        "items": 5
+      }
+    }
+  ]
+}

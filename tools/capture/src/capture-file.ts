@@ -229,8 +229,10 @@ export class CaptureFile {
   /**
    * Serializes to a deterministic JSON string. Object keys are emitted in a
    * fixed canonical order; request order is preserved exactly as supplied.
+   * Compact by default; pass an indent (e.g. 2) for pretty output — key
+   * order and content are identical either way.
    */
-  toJson(): string {
+  toJson(indent?: number): string {
     const { platform, allowlistVersion, capturedAt, requests } = this.input;
 
     const serializedRequests = requests.map((request) => ({
@@ -248,12 +250,14 @@ export class CaptureFile {
       ),
     }));
 
-    return JSON.stringify({
+    const document = {
       capture_format: CAPTURE_FORMAT,
       platform,
       allowlist_version: allowlistVersion,
       captured_at: capturedAt,
       requests: serializedRequests,
-    });
+    };
+
+    return JSON.stringify(document, null, indent);
   }
 }

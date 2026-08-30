@@ -1,0 +1,17 @@
+{
+  "version": "example-1",
+  "rules": [
+    {
+      "path": "id",
+      "mode": "keep"
+    },
+    {
+      "path": "term",
+      "mode": "type"
+    },
+    {
+      "path": "items[].code",
+      "mode": "keep"
+    }
+  ]
+}
