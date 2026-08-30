@@ -1,0 +1,17 @@
+{
+  "name": "school-connector-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Open-source connector toolkit for German school and Kita platforms.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

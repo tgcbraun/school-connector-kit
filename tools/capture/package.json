@@ -1,0 +1,11 @@
+{
+  "name": "@school-connector-kit/capture",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Privacy-safe structural capture and redaction tooling.",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
