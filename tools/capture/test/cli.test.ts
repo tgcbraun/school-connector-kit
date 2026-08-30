@@ -651,4 +651,44 @@ describe("capture CLI", () => {
     expect(result.code).toBe(1);
     expect(result.message).toContain("not a regular file");
   });
+
+  it("accepts a bare -- end-of-options separator (npm/pnpm passthrough)", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+
+    const result = runCli(["--", ...baseArgs()], defaultIo);
+
+    expect(result.code).toBe(0);
+    expect(readFileSync(join(dir, "out.json"), "utf8")).toContain(
+      "capture_format",
+    );
+  });
+
+  it("resolves relative flag paths against the caller's cwd (INIT_CWD)", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+
+    // Simulates the pnpm-script situation: the CLI process's cwd is the
+    // package directory (no such files there), but the caller's cwd —
+    // exposed as INIT_CWD — holds the files. Relative flag values must
+    // therefore resolve against INIT_CWD, not process.cwd().
+    const previous = process.env.INIT_CWD;
+    try {
+      process.env.INIT_CWD = dir;
+      const result = runCli(
+        baseArgs({ input: "in.json", allowlist: "allowlist.json", output: "out.json" }),
+        defaultIo,
+      );
+      expect(result).toEqual({ code: 0, message: "capture written" });
+      expect(readFileSync(join(dir, "out.json"), "utf8")).toContain(
+        "capture_format",
+      );
+    } finally {
+      if (previous === undefined) {
+        delete process.env.INIT_CWD;
+      } else {
+        process.env.INIT_CWD = previous;
+      }
+    }
+  });
 });

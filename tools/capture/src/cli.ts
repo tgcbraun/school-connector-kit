@@ -15,6 +15,7 @@
  *   symlink is refused.
  */
 import { lstatSync, readFileSync, writeFileSync } from "node:fs";
+import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import {
@@ -54,16 +55,32 @@ export interface CliIo {
   stat(path: string): FileStat;
 }
 
+/**
+ * Relative flag paths resolve against the caller's working directory. When
+ * this CLI is started through an npm/pnpm package script, the process cwd is
+ * forced to the package directory, so the original caller cwd is recovered
+ * from INIT_CWD (set by npm/pnpm for script execution) when present.
+ * Absolute paths pass through unchanged; without INIT_CWD the process cwd is
+ * used, preserving direct-invocation behaviour.
+ */
+function callerPath(path: string): string {
+  if (isAbsolute(path)) {
+    return path;
+  }
+  const base = process.env.INIT_CWD;
+  return resolve(base !== undefined && base.length > 0 ? base : process.cwd(), path);
+}
+
 export const defaultIo: CliIo = {
   readFile(path) {
-    return readFileSync(path, "utf8");
+    return readFileSync(callerPath(path), "utf8");
   },
   writeFile(path, data) {
-    writeFileSync(path, data, "utf8");
+    writeFileSync(callerPath(path), data, "utf8");
   },
   stat(path) {
     try {
-      const info = lstatSync(path);
+      const info = lstatSync(callerPath(path));
       return {
         exists: true,
         isSymlink: info.isSymbolicLink(),
@@ -101,8 +118,9 @@ export interface CliOptions {
 
 /**
  * Strict flag parsing: two-token `--flag value` form only, no unknown flags,
- * no duplicates, no missing values. Messages name the flag only — never a
- * supplied value.
+ * no duplicates, no missing values. A bare `--` (end-of-options separator,
+ * passed through by npm/pnpm script invocations) is accepted and ignored.
+ * Messages name the flag only — never a supplied value.
  */
 export function parseArgs(argv: readonly string[]): CliOptions {
   const values = new Map<string, string>();
@@ -110,6 +128,10 @@ export function parseArgs(argv: readonly string[]): CliOptions {
 
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
+    if (typeof token === "string" && token === "--") {
+      // End-of-options marker: accepted, ignored, parsing continues.
+      continue;
+    }
     if (typeof token !== "string" || !token.startsWith("--") || token.length <= 2) {
       throw new CliError("ARGUMENTS", "every argument must be a --flag");
     }
