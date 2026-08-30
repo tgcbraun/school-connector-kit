@@ -330,6 +330,83 @@ describe("capture CLI", () => {
     expect(parsed.requests[0].url_template).toBe(template);
   });
 
+  it("accepts digit-and-dot version path segments", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+    const template =
+      "/api/1.0/current-timetable?date={date}&week=true&substitutions=false";
+
+    const result = runCli(baseArgs({ "url-template": template }), defaultIo);
+
+    expect(result.code).toBe(0);
+    const parsed = JSON.parse(readFileSync(join(dir, "out.json"), "utf8"));
+    expect(parsed.requests[0].url_template).toBe(template);
+  });
+
+  it("still rejects raw query values after the version-segment relaxation", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+
+    const result = runCli(
+      baseArgs({ "url-template": "/api/1.0/day?day=2026-08-30" }),
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).not.toContain("2026-08-30");
+  });
+
+  it("still rejects path segments mixing digits and letters (e.g. 1.0x)", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+
+    const result = runCli(
+      baseArgs({ "url-template": "/api/1.0x/current-timetable?date={date}" }),
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).not.toContain("1.0x");
+  });
+
+  it("accepts a single trailing slash before the query", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+    const template =
+      "/api/1.0/current-timetable/?date={date}&week=true&substitutions=false";
+
+    const result = runCli(baseArgs({ "url-template": template }), defaultIo);
+
+    expect(result.code).toBe(0);
+    const parsed = JSON.parse(readFileSync(join(dir, "out.json"), "utf8"));
+    expect(parsed.requests[0].url_template).toBe(template);
+  });
+
+  it("accepts a single trailing slash with no query", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+    const template = "/api/1.0/data/";
+
+    const result = runCli(baseArgs({ "url-template": template }), defaultIo);
+
+    expect(result.code).toBe(0);
+    const parsed = JSON.parse(readFileSync(join(dir, "out.json"), "utf8"));
+    expect(parsed.requests[0].url_template).toBe(template);
+  });
+
+  it("still rejects interior empty segments (double slashes)", () => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+
+    const result = runCli(
+      baseArgs({ "url-template": "/api//data/1.0/x?from={f}" }),
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).not.toContain("//");
+  });
+
   it("rejects invalid captured-at timestamps", () => {
     write("in.json", JSON.stringify(SYNTHETIC_INPUT));
     write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));

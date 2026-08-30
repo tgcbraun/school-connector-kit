@@ -232,16 +232,20 @@ export function parseStatus(raw: string): number {
  *   /seg(/seg)*[?param(=value)?(&param(=value)?)*]
  *
  * - relative only: a leading "/", no scheme, no "//host", no whitespace;
- * - every path segment is either a letter-led identifier or a
- *   {placeholder}; pure-literal segments (IDs, accounts) are rejected;
+ * - every path segment is a letter-led identifier, a {placeholder}, or a
+ *   version segment of digits and dots (`1.0`, `2`, `10.4`); other
+ *   pure-literal segments (IDs, accounts) are rejected;
  * - query values are either a letter-led identifier or a {placeholder};
  *   raw query values are rejected;
+ * - at most one trailing "/" may terminate the path (before "?" or at
+ *   end of template); empty interior segments ("//") are not permitted;
  * - userinfo ("@"), fragments ("#"), percent-encoding and any other
  *   character are rejected by the allowlist.
  *
  * No message below echoes the supplied template.
  */
-const TEMPLATE_SEGMENT = "(?:[A-Za-z][A-Za-z0-9_-]*|\\{[A-Za-z0-9_-]+\\})";
+const TEMPLATE_SEGMENT =
+  "(?:[A-Za-z][A-Za-z0-9_-]*|\\{[A-Za-z0-9_-]+\\}|\\d+(?:\\.\\d+)*)";
 const TEMPLATE_PARAM_NAME = "[A-Za-z0-9_-]+";
 const TEMPLATE_PARAM_VALUE =
   "(?:[A-Za-z][A-Za-z0-9_-]*|\\{[A-Za-z0-9_-]+\\})";
@@ -250,7 +254,8 @@ const TEMPLATE_QUERY =
   `(?:&${TEMPLATE_PARAM_NAME}(?:=${TEMPLATE_PARAM_VALUE})?)*`;
 
 export const URL_TEMPLATE_PATTERN = new RegExp(
-  `^/${TEMPLATE_SEGMENT}(?:/${TEMPLATE_SEGMENT})*(?:\\?${TEMPLATE_QUERY})?$`,
+  `^/${TEMPLATE_SEGMENT}(?:/${TEMPLATE_SEGMENT})*(?:/)?` +
+    `(?:\\?${TEMPLATE_QUERY})?$`,
 );
 
 export function validateUrlTemplate(raw: string): void {
