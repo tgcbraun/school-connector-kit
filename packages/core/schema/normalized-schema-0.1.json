@@ -1,0 +1,2057 @@
+{
+  "concepts": {
+    "assignment": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "completed": {
+          "type": "boolean"
+        },
+        "concept": {
+          "const": "assignment",
+          "type": "string"
+        },
+        "due_date": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "platform_date_int",
+              "type": "string"
+            },
+            "value": {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        "lesson_id": {
+          "type": "string"
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "allowlist_version": {
+              "type": "string"
+            },
+            "captured_at": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "concept": {
+              "const": "provenance_envelope",
+              "type": "string"
+            },
+            "occurrence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request": {
+              "additionalProperties": false,
+              "properties": {
+                "index": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "method": {
+                  "const": "GET",
+                  "type": "string"
+                },
+                "status": {
+                  "const": 200,
+                  "type": "number"
+                },
+                "url_template": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "status",
+                "url_template"
+              ],
+              "type": "object"
+            },
+            "source_instance": {
+              "type": "string"
+            },
+            "source_platform": {
+              "enum": [
+                "webuntis",
+                "dieschulapp",
+                "kikom"
+              ],
+              "type": "string"
+            },
+            "source_record_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "source_platform",
+            "source_instance",
+            "source_record_id",
+            "allowlist_version",
+            "captured_at",
+            "request"
+          ],
+          "type": "object"
+        },
+        "reference_date": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "platform_date_int",
+              "type": "string"
+            },
+            "value": {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        "remark": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept",
+        "reference_date",
+        "due_date",
+        "completed",
+        "text",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "event": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "concept": {
+          "const": "event",
+          "type": "string"
+        },
+        "date": {
+          "additionalProperties": false,
+          "properties": {
+            "day": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "inference_anchor": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "partial_day",
+              "type": "string"
+            },
+            "month": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "resolved_year": {
+              "maximum": 9007199254740991,
+              "minimum": 1900,
+              "type": "integer"
+            },
+            "sequence_position": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "year_stated_by_platform": {
+              "const": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "month",
+            "day",
+            "resolved_year",
+            "year_stated_by_platform",
+            "inference_anchor"
+          ],
+          "type": "object"
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "allowlist_version": {
+              "type": "string"
+            },
+            "captured_at": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "concept": {
+              "const": "provenance_envelope",
+              "type": "string"
+            },
+            "occurrence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request": {
+              "additionalProperties": false,
+              "properties": {
+                "index": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "method": {
+                  "const": "GET",
+                  "type": "string"
+                },
+                "status": {
+                  "const": 200,
+                  "type": "number"
+                },
+                "url_template": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "status",
+                "url_template"
+              ],
+              "type": "object"
+            },
+            "source_instance": {
+              "type": "string"
+            },
+            "source_platform": {
+              "enum": [
+                "webuntis",
+                "dieschulapp",
+                "kikom"
+              ],
+              "type": "string"
+            },
+            "source_record_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "source_platform",
+            "source_instance",
+            "source_record_id",
+            "allowlist_version",
+            "captured_at",
+            "request"
+          ],
+          "type": "object"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept",
+        "date",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "message": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "concept": {
+          "const": "message",
+          "type": "string"
+        },
+        "date": {
+          "additionalProperties": false,
+          "properties": {
+            "day": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "day_only",
+              "type": "string"
+            },
+            "month": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "year": {
+              "maximum": 9007199254740991,
+              "minimum": 1900,
+              "type": "integer"
+            },
+            "year_provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "century_inferred": {
+                  "const": true,
+                  "type": "boolean"
+                },
+                "inference_by": {
+                  "const": "normalizer",
+                  "type": "string"
+                },
+                "stated_digits": {
+                  "const": 2,
+                  "type": "number"
+                },
+                "year_stated_by_platform": {
+                  "const": true,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "year_stated_by_platform",
+                "stated_digits",
+                "century_inferred",
+                "inference_by"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "kind",
+            "year",
+            "month",
+            "day",
+            "year_provenance"
+          ],
+          "type": "object"
+        },
+        "link_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "allowlist_version": {
+              "type": "string"
+            },
+            "captured_at": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "concept": {
+              "const": "provenance_envelope",
+              "type": "string"
+            },
+            "occurrence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request": {
+              "additionalProperties": false,
+              "properties": {
+                "index": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "method": {
+                  "const": "GET",
+                  "type": "string"
+                },
+                "status": {
+                  "const": 200,
+                  "type": "number"
+                },
+                "url_template": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "status",
+                "url_template"
+              ],
+              "type": "object"
+            },
+            "source_instance": {
+              "type": "string"
+            },
+            "source_platform": {
+              "enum": [
+                "webuntis",
+                "dieschulapp",
+                "kikom"
+              ],
+              "type": "string"
+            },
+            "source_record_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "source_platform",
+            "source_instance",
+            "source_record_id",
+            "allowlist_version",
+            "captured_at",
+            "request"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "concept",
+        "date",
+        "body",
+        "link_count",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "normalized_message": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "concept": {
+              "const": "timetable_entry",
+              "type": "string"
+            },
+            "location": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "end_time": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "weekday_slot",
+                      "type": "string"
+                    },
+                    "slot_number": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991,
+                      "type": "integer"
+                    },
+                    "start_time": {
+                      "type": "string"
+                    },
+                    "student": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "concept": {
+                          "const": "student_reference",
+                          "type": "string"
+                        },
+                        "provenance": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allowlist_version": {
+                              "type": "string"
+                            },
+                            "captured_at": {
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                              "type": "string"
+                            },
+                            "concept": {
+                              "const": "provenance_envelope",
+                              "type": "string"
+                            },
+                            "occurrence": {
+                              "maximum": 9007199254740991,
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "request": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "index": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "method": {
+                                  "const": "GET",
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "const": 200,
+                                  "type": "number"
+                                },
+                                "url_template": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "method",
+                                "status",
+                                "url_template"
+                              ],
+                              "type": "object"
+                            },
+                            "source_instance": {
+                              "type": "string"
+                            },
+                            "source_platform": {
+                              "enum": [
+                                "webuntis",
+                                "dieschulapp",
+                                "kikom"
+                              ],
+                              "type": "string"
+                            },
+                            "source_record_id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "concept",
+                            "source_platform",
+                            "source_instance",
+                            "source_record_id",
+                            "allowlist_version",
+                            "captured_at",
+                            "request"
+                          ],
+                          "type": "object"
+                        },
+                        "student_id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "concept",
+                        "student_id",
+                        "provenance"
+                      ],
+                      "type": "object"
+                    },
+                    "subject": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "acronym": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "week_anchor": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "present_in_response": {
+                          "const": false,
+                          "type": "boolean"
+                        },
+                        "resolution": {
+                          "const": "out_of_band_request_parameter",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "present_in_response",
+                        "resolution"
+                      ],
+                      "type": "object"
+                    },
+                    "weekday": {
+                      "maximum": 6,
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "weekday",
+                    "slot_number",
+                    "start_time",
+                    "end_time",
+                    "week_anchor"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "lesson_reference",
+                      "type": "string"
+                    },
+                    "lesson_id": {
+                      "type": "string"
+                    },
+                    "lesson_type": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "lesson_id"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "allowlist_version": {
+                  "type": "string"
+                },
+                "captured_at": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "concept": {
+                  "const": "provenance_envelope",
+                  "type": "string"
+                },
+                "occurrence": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "request": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "index": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "status": {
+                      "const": 200,
+                      "type": "number"
+                    },
+                    "url_template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "status",
+                    "url_template"
+                  ],
+                  "type": "object"
+                },
+                "source_instance": {
+                  "type": "string"
+                },
+                "source_platform": {
+                  "enum": [
+                    "webuntis",
+                    "dieschulapp",
+                    "kikom"
+                  ],
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "concept",
+                "source_platform",
+                "source_instance",
+                "source_record_id",
+                "allowlist_version",
+                "captured_at",
+                "request"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "concept",
+            "location",
+            "provenance"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "completed": {
+              "type": "boolean"
+            },
+            "concept": {
+              "const": "assignment",
+              "type": "string"
+            },
+            "due_date": {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "platform_date_int",
+                  "type": "string"
+                },
+                "value": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "type": "object"
+            },
+            "lesson_id": {
+              "type": "string"
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "allowlist_version": {
+                  "type": "string"
+                },
+                "captured_at": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "concept": {
+                  "const": "provenance_envelope",
+                  "type": "string"
+                },
+                "occurrence": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "request": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "index": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "status": {
+                      "const": 200,
+                      "type": "number"
+                    },
+                    "url_template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "status",
+                    "url_template"
+                  ],
+                  "type": "object"
+                },
+                "source_instance": {
+                  "type": "string"
+                },
+                "source_platform": {
+                  "enum": [
+                    "webuntis",
+                    "dieschulapp",
+                    "kikom"
+                  ],
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "concept",
+                "source_platform",
+                "source_instance",
+                "source_record_id",
+                "allowlist_version",
+                "captured_at",
+                "request"
+              ],
+              "type": "object"
+            },
+            "reference_date": {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "platform_date_int",
+                  "type": "string"
+                },
+                "value": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "type": "object"
+            },
+            "remark": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "reference_date",
+            "due_date",
+            "completed",
+            "text",
+            "provenance"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "concept": {
+              "const": "event",
+              "type": "string"
+            },
+            "date": {
+              "additionalProperties": false,
+              "properties": {
+                "day": {
+                  "maximum": 31,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "inference_anchor": {
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "partial_day",
+                  "type": "string"
+                },
+                "month": {
+                  "maximum": 12,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "resolved_year": {
+                  "maximum": 9007199254740991,
+                  "minimum": 1900,
+                  "type": "integer"
+                },
+                "sequence_position": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "year_stated_by_platform": {
+                  "const": false,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "kind",
+                "month",
+                "day",
+                "resolved_year",
+                "year_stated_by_platform",
+                "inference_anchor"
+              ],
+              "type": "object"
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "allowlist_version": {
+                  "type": "string"
+                },
+                "captured_at": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "concept": {
+                  "const": "provenance_envelope",
+                  "type": "string"
+                },
+                "occurrence": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "request": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "index": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "status": {
+                      "const": 200,
+                      "type": "number"
+                    },
+                    "url_template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "status",
+                    "url_template"
+                  ],
+                  "type": "object"
+                },
+                "source_instance": {
+                  "type": "string"
+                },
+                "source_platform": {
+                  "enum": [
+                    "webuntis",
+                    "dieschulapp",
+                    "kikom"
+                  ],
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "concept",
+                "source_platform",
+                "source_instance",
+                "source_record_id",
+                "allowlist_version",
+                "captured_at",
+                "request"
+              ],
+              "type": "object"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "date",
+            "provenance"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "type": "string"
+            },
+            "concept": {
+              "const": "message",
+              "type": "string"
+            },
+            "date": {
+              "additionalProperties": false,
+              "properties": {
+                "day": {
+                  "maximum": 31,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "day_only",
+                  "type": "string"
+                },
+                "month": {
+                  "maximum": 12,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "year": {
+                  "maximum": 9007199254740991,
+                  "minimum": 1900,
+                  "type": "integer"
+                },
+                "year_provenance": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "century_inferred": {
+                      "const": true,
+                      "type": "boolean"
+                    },
+                    "inference_by": {
+                      "const": "normalizer",
+                      "type": "string"
+                    },
+                    "stated_digits": {
+                      "const": 2,
+                      "type": "number"
+                    },
+                    "year_stated_by_platform": {
+                      "const": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "year_stated_by_platform",
+                    "stated_digits",
+                    "century_inferred",
+                    "inference_by"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "kind",
+                "year",
+                "month",
+                "day",
+                "year_provenance"
+              ],
+              "type": "object"
+            },
+            "link_count": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "allowlist_version": {
+                  "type": "string"
+                },
+                "captured_at": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "concept": {
+                  "const": "provenance_envelope",
+                  "type": "string"
+                },
+                "occurrence": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "request": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "index": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "status": {
+                      "const": 200,
+                      "type": "number"
+                    },
+                    "url_template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "status",
+                    "url_template"
+                  ],
+                  "type": "object"
+                },
+                "source_instance": {
+                  "type": "string"
+                },
+                "source_platform": {
+                  "enum": [
+                    "webuntis",
+                    "dieschulapp",
+                    "kikom"
+                  ],
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "concept",
+                "source_platform",
+                "source_instance",
+                "source_record_id",
+                "allowlist_version",
+                "captured_at",
+                "request"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "concept",
+            "date",
+            "body",
+            "link_count",
+            "provenance"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "concept": {
+              "const": "student_reference",
+              "type": "string"
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "allowlist_version": {
+                  "type": "string"
+                },
+                "captured_at": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "concept": {
+                  "const": "provenance_envelope",
+                  "type": "string"
+                },
+                "occurrence": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "request": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "index": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "status": {
+                      "const": 200,
+                      "type": "number"
+                    },
+                    "url_template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "status",
+                    "url_template"
+                  ],
+                  "type": "object"
+                },
+                "source_instance": {
+                  "type": "string"
+                },
+                "source_platform": {
+                  "enum": [
+                    "webuntis",
+                    "dieschulapp",
+                    "kikom"
+                  ],
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "concept",
+                "source_platform",
+                "source_instance",
+                "source_record_id",
+                "allowlist_version",
+                "captured_at",
+                "request"
+              ],
+              "type": "object"
+            },
+            "student_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "student_id",
+            "provenance"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "provenance_envelope": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "allowlist_version": {
+          "type": "string"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        "concept": {
+          "const": "provenance_envelope",
+          "type": "string"
+        },
+        "occurrence": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "index": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "method": {
+              "const": "GET",
+              "type": "string"
+            },
+            "status": {
+              "const": 200,
+              "type": "number"
+            },
+            "url_template": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "method",
+            "status",
+            "url_template"
+          ],
+          "type": "object"
+        },
+        "source_instance": {
+          "type": "string"
+        },
+        "source_platform": {
+          "enum": [
+            "webuntis",
+            "dieschulapp",
+            "kikom"
+          ],
+          "type": "string"
+        },
+        "source_record_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept",
+        "source_platform",
+        "source_instance",
+        "source_record_id",
+        "allowlist_version",
+        "captured_at",
+        "request"
+      ],
+      "type": "object"
+    },
+    "student_reference": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "concept": {
+          "const": "student_reference",
+          "type": "string"
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "allowlist_version": {
+              "type": "string"
+            },
+            "captured_at": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "concept": {
+              "const": "provenance_envelope",
+              "type": "string"
+            },
+            "occurrence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request": {
+              "additionalProperties": false,
+              "properties": {
+                "index": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "method": {
+                  "const": "GET",
+                  "type": "string"
+                },
+                "status": {
+                  "const": 200,
+                  "type": "number"
+                },
+                "url_template": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "status",
+                "url_template"
+              ],
+              "type": "object"
+            },
+            "source_instance": {
+              "type": "string"
+            },
+            "source_platform": {
+              "enum": [
+                "webuntis",
+                "dieschulapp",
+                "kikom"
+              ],
+              "type": "string"
+            },
+            "source_record_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "source_platform",
+            "source_instance",
+            "source_record_id",
+            "allowlist_version",
+            "captured_at",
+            "request"
+          ],
+          "type": "object"
+        },
+        "student_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept",
+        "student_id",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "timetable_entry": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "concept": {
+          "const": "timetable_entry",
+          "type": "string"
+        },
+        "location": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end_time": {
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "weekday_slot",
+                  "type": "string"
+                },
+                "slot_number": {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer"
+                },
+                "start_time": {
+                  "type": "string"
+                },
+                "student": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "concept": {
+                      "const": "student_reference",
+                      "type": "string"
+                    },
+                    "provenance": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowlist_version": {
+                          "type": "string"
+                        },
+                        "captured_at": {
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                          "type": "string"
+                        },
+                        "concept": {
+                          "const": "provenance_envelope",
+                          "type": "string"
+                        },
+                        "occurrence": {
+                          "maximum": 9007199254740991,
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "request": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "index": {
+                              "maximum": 9007199254740991,
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "method": {
+                              "const": "GET",
+                              "type": "string"
+                            },
+                            "status": {
+                              "const": 200,
+                              "type": "number"
+                            },
+                            "url_template": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "method",
+                            "status",
+                            "url_template"
+                          ],
+                          "type": "object"
+                        },
+                        "source_instance": {
+                          "type": "string"
+                        },
+                        "source_platform": {
+                          "enum": [
+                            "webuntis",
+                            "dieschulapp",
+                            "kikom"
+                          ],
+                          "type": "string"
+                        },
+                        "source_record_id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "concept",
+                        "source_platform",
+                        "source_instance",
+                        "source_record_id",
+                        "allowlist_version",
+                        "captured_at",
+                        "request"
+                      ],
+                      "type": "object"
+                    },
+                    "student_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "concept",
+                    "student_id",
+                    "provenance"
+                  ],
+                  "type": "object"
+                },
+                "subject": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "acronym": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                },
+                "week_anchor": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "present_in_response": {
+                      "const": false,
+                      "type": "boolean"
+                    },
+                    "resolution": {
+                      "const": "out_of_band_request_parameter",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "present_in_response",
+                    "resolution"
+                  ],
+                  "type": "object"
+                },
+                "weekday": {
+                  "maximum": 6,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "weekday",
+                "slot_number",
+                "start_time",
+                "end_time",
+                "week_anchor"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "lesson_reference",
+                  "type": "string"
+                },
+                "lesson_id": {
+                  "type": "string"
+                },
+                "lesson_type": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "lesson_id"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "allowlist_version": {
+              "type": "string"
+            },
+            "captured_at": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "concept": {
+              "const": "provenance_envelope",
+              "type": "string"
+            },
+            "occurrence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request": {
+              "additionalProperties": false,
+              "properties": {
+                "index": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "method": {
+                  "const": "GET",
+                  "type": "string"
+                },
+                "status": {
+                  "const": 200,
+                  "type": "number"
+                },
+                "url_template": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "status",
+                "url_template"
+              ],
+              "type": "object"
+            },
+            "source_instance": {
+              "type": "string"
+            },
+            "source_platform": {
+              "enum": [
+                "webuntis",
+                "dieschulapp",
+                "kikom"
+              ],
+              "type": "string"
+            },
+            "source_record_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "concept",
+            "source_platform",
+            "source_instance",
+            "source_record_id",
+            "allowlist_version",
+            "captured_at",
+            "request"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "concept",
+        "location",
+        "provenance"
+      ],
+      "type": "object"
+    }
+  },
+  "date_forms": {
+    "date_value": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "platform_date_int",
+              "type": "string"
+            },
+            "value": {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "end_time": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "weekday_slot",
+              "type": "string"
+            },
+            "slot_number": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "start_time": {
+              "type": "string"
+            },
+            "week_anchor": {
+              "additionalProperties": false,
+              "properties": {
+                "present_in_response": {
+                  "const": false,
+                  "type": "boolean"
+                },
+                "resolution": {
+                  "const": "out_of_band_request_parameter",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "present_in_response",
+                "resolution"
+              ],
+              "type": "object"
+            },
+            "weekday": {
+              "maximum": 6,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "weekday",
+            "slot_number",
+            "start_time",
+            "end_time",
+            "week_anchor"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "day": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "inference_anchor": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "partial_day",
+              "type": "string"
+            },
+            "month": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "resolved_year": {
+              "maximum": 9007199254740991,
+              "minimum": 1900,
+              "type": "integer"
+            },
+            "sequence_position": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "year_stated_by_platform": {
+              "const": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "month",
+            "day",
+            "resolved_year",
+            "year_stated_by_platform",
+            "inference_anchor"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "day": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "day_only",
+              "type": "string"
+            },
+            "month": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "year": {
+              "maximum": 9007199254740991,
+              "minimum": 1900,
+              "type": "integer"
+            },
+            "year_provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "century_inferred": {
+                  "const": true,
+                  "type": "boolean"
+                },
+                "inference_by": {
+                  "const": "normalizer",
+                  "type": "string"
+                },
+                "stated_digits": {
+                  "const": 2,
+                  "type": "number"
+                },
+                "year_stated_by_platform": {
+                  "const": true,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "year_stated_by_platform",
+                "stated_digits",
+                "century_inferred",
+                "inference_by"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "kind",
+            "year",
+            "month",
+            "day",
+            "year_provenance"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "day_only": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "maximum": 31,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "day_only",
+          "type": "string"
+        },
+        "month": {
+          "maximum": 12,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "year": {
+          "maximum": 9007199254740991,
+          "minimum": 1900,
+          "type": "integer"
+        },
+        "year_provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "century_inferred": {
+              "const": true,
+              "type": "boolean"
+            },
+            "inference_by": {
+              "const": "normalizer",
+              "type": "string"
+            },
+            "stated_digits": {
+              "const": 2,
+              "type": "number"
+            },
+            "year_stated_by_platform": {
+              "const": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "year_stated_by_platform",
+            "stated_digits",
+            "century_inferred",
+            "inference_by"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "year",
+        "month",
+        "day",
+        "year_provenance"
+      ],
+      "type": "object"
+    },
+    "partial_day": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "maximum": 31,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "inference_anchor": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "partial_day",
+          "type": "string"
+        },
+        "month": {
+          "maximum": 12,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "resolved_year": {
+          "maximum": 9007199254740991,
+          "minimum": 1900,
+          "type": "integer"
+        },
+        "sequence_position": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "year_stated_by_platform": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "month",
+        "day",
+        "resolved_year",
+        "year_stated_by_platform",
+        "inference_anchor"
+      ],
+      "type": "object"
+    },
+    "platform_date_int": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "platform_date_int",
+          "type": "string"
+        },
+        "value": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "type": "object"
+    },
+    "weekday_slot": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "end_time": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "weekday_slot",
+          "type": "string"
+        },
+        "slot_number": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "type": "integer"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "week_anchor": {
+          "additionalProperties": false,
+          "properties": {
+            "present_in_response": {
+              "const": false,
+              "type": "boolean"
+            },
+            "resolution": {
+              "const": "out_of_band_request_parameter",
+              "type": "string"
+            }
+          },
+          "required": [
+            "present_in_response",
+            "resolution"
+          ],
+          "type": "object"
+        },
+        "weekday": {
+          "maximum": 6,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "weekday",
+        "slot_number",
+        "start_time",
+        "end_time",
+        "week_anchor"
+      ],
+      "type": "object"
+    }
+  },
+  "generator": {
+    "api": "zod v4 z.toJSONSchema",
+    "zod_version": "4.5.4"
+  },
+  "json_schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "0.1",
+  "source_of_truth": "Zod definitions in packages/core/src/schema.ts — this document is generated, never hand-written",
+  "title": "school-connector-kit normalized schema"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@school-connector-kit/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Vendor-neutral normalized schemas shared by connectors and consumers (schema 0.1). Zod is the single executable source; JSON Schema is generated from it, never hand-written.",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "generate-schema": "npm run build && node dist/generate-json-schema.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}
