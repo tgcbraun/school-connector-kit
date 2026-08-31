@@ -83,6 +83,12 @@ all captures (G3).
 - **G6 WebUntis date-int encoding** — `date`/`dueDate` are typed int with redacted values: digit count, range, epoch, and unit are not established; 0.1 models no components.
 - **G7 Message link targets** — hyperlink columns are present (count pinned); targets were never captured.
 - **G8 Message `updated`** — placeholder column (length 1) with format never pinned; deliberately not modeled.
+- **G9 connector fetcher return types unbound to schema concepts** — `ConnectorFetchers` return `readonly unknown[]` at this stage; binding them to the 0.1 concepts is the next step and needs a real connector to justify the binding (ADR-003).
+- **G10 binary response bodies unsupported by Transport** — `HttpRequest.body` / `HttpResponse.body` are strings; binary payloads are out of scope at this stage (ADR-003).
+- **G11 FetchRequest carries only a window; no evidence yet for other parameters** — the WebUntis capture evidences the request window (it selects on the due-date field); nothing in the captures evidences any further request parameter (ADR-003).
+- **G12 packages/core had no declared entry point until ADR-003; no consumer had ever imported it by package name** — tests imported `src` files directly; the barrel and the `exports` record were added with ADR-003.
+- **G13 `packages/core/src/` mixes shippable and build-time modules; they are separated only by reachability from the entry point, not by directory** — `document.ts` and `generate-json-schema.ts` sit in the same tree as the shippable surface; ADR-003's rule and scan follow the entry point's import closure, and no directory or exclusion list performs the separation.
+- **G14 packages/core sets no `"lib"`; the target default includes DOM typings** — so DOM globals typecheck under the package's tsconfig chain, and are caught only textually by the entry-closure scan, not by the type system (ADR-003).
 
 G0–G8 keep these identifiers; earlier cross-references remain valid.
 
