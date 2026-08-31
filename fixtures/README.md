@@ -30,7 +30,7 @@ A variant carries one or more capture/allowlist pairs. An allowlist binds to exa
   `variant-002`, …).
 - A variant is NOT a school. Never organize fixtures by institution;
   never include a school id, tenant id, or any value that identifies an
-  institution in `variants.md` or a capture.
+  institution in `README.md` or a capture.
 
 ## Promotion workflow
 
@@ -72,8 +72,12 @@ No stage may be skipped, and no stage automates the human review.
     staff, parent) or family.
 11. No value identifies an institution (school name, school id, tenant,
     address, phone, email).
-12. `README.md` exists and contains the reviewer's name/initials, date, and
-    explicit per-`keep` justification.
+12. `README.md` exists; it records the date the human privacy review was
+    performed, states that the review passed, and records the per-`keep`
+    justification, or records that the capture keeps no values at all. Review
+    accountability is carried by the commit author in Git history; requiring
+    a contributor to attach their name to a published file imposes a privacy
+    cost the commit record already covers without it.
 13. The fixture is usable by downstream work WITHOUT access to the original
     response or to `private-fixtures/`.
 
