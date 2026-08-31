@@ -69,8 +69,10 @@ function compareCodePoints(a: string, b: string): number {
 
 /**
  * The connector's capabilities: exactly the fetcher keys that hold a
- * function, in deterministic code-point order (a partial connector and a
- * connector that stores a non-function under a key are both legal inputs).
+ * function, in deterministic code-point order. A fetcher key that is absent
+ * or explicitly `undefined` yields no capability; under the declared types a
+ * non-function value is not legal input except by an explicit cast.
+ * (ADR-003, decision 6.)
  */
 export function capabilitiesOf(connector: Connector): readonly ConnectorCapability[] {
   return (Object.keys(connector.fetchers) as ConnectorCapability[]).filter(
