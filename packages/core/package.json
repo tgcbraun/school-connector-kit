@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "description": "Vendor-neutral normalized schemas shared by connectors and consumers (schema 0.1). Zod is the single executable source; JSON Schema is generated from it, never hand-written.",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
