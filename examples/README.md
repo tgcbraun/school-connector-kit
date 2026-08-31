@@ -33,3 +33,30 @@ pnpm --filter @school-connector-kit/capture capture -- \
 
 Then compare `/tmp/expected-copy.json` with `expected-capture.json` —
 they must be identical.
+
+## Golden HTML structural capture example (synthetic, `capture_format` 2)
+
+| File | Role |
+| ---- | ---- |
+| `synthetic-html-page.html` | A fictional captured HTML page (all markup is invented). |
+| `synthetic-html-allowlist.json` | A fictional format-2 allowlist (selectors only). |
+| `expected-html-capture.json` | The deterministic capture output the tool must reproduce byte-for-byte. |
+
+Reproduce it from the repository root:
+
+```sh
+pnpm --filter @school-connector-kit/capture capture -- html \
+  --input examples/synthetic-html-page.html \
+  --allowlist examples/synthetic-html-allowlist.json \
+  --platform kikom \
+  --captured-at 2025-06-15T08:30:00Z \
+  --method GET \
+  --url-template '/api/v1/schedule/{term}' \
+  --status 200 \
+  --output /tmp/expected-html-copy.json
+```
+
+Then compare `/tmp/expected-html-copy.json` with
+`expected-html-capture.json` — they must be identical. The golden answer
+deliberately contains no cell text, no attribute values, no URL paths, and
+no query-parameter values — only names, counts, and lengths.

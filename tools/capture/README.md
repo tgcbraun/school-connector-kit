@@ -105,6 +105,52 @@ passing this check may still describe a route that identifies an
 institution in combination with other context; reviewers must read
 `url_template` as part of the privacy review.
 
+## HTML structural capture (`html` subcommand, `capture_format` 2)
+
+A second capture mode for captured HTML pages (ADR-002), implemented as a
+sibling of the JSON redaction path in the same package: it shares the flag
+vocabulary, the URL-template policy, the envelope helpers, and the
+output-write rules (symlink refusal, explicit `--force`), and reuses the
+same canonical, deterministic serialization.
+
+- The first CLI token, when it is the literal word `html`, switches to this
+  path (ADR-002 §9, option 1): `input` is an HTML file, `allowlist` is a
+  format-2 allowlist (`version` + `selectors` of
+  `{kind: table | pagination, classes, scopes?, row_attribute?}`).
+- **No text content** is ever emitted: text is reported by code-point
+  length only. **No attribute values** appear in the output except
+  query-parameter *names* read from row anchor `href`s; URL paths and
+  parameter values stay out.
+- Selectors resolve structurally (tag + class containment + scope classes +
+  optional row-attribute name) and must resolve to **exactly one** element;
+  zero or multiple candidates fail closed. Analysis is confined to the
+  resolved subtree by construction.
+- Tables report true `row_count` with at most 3 rows inspected
+  (`rows_inspected`); columns report a content class, a length range, a
+  shared date-shape pattern (pattern name + match count, never the text),
+  and whole-cell versus child anchor counts.
+- Pagination containers report presence, classes, and whether the fixed
+  v1 next-link rule (a `c-next` list item holding an anchor) matches.
+- `unparsed` counts tags outside a fixed whitelist per request; the key is
+  **omitted** from the serialized request when the count is 0.
+- A strict, well-formedness-requiring parser is used: ambiguous or broken
+  markup fails closed instead of being guessed at.
+
+```sh
+pnpm --filter @school-connector-kit/capture capture -- html \
+  --input my-synthetic-page.html \
+  --allowlist my-html-allowlist.json \
+  --platform example \
+  --captured-at 2025-06-15T08:30:00Z \
+  --method GET \
+  --url-template '/api/example?start={start}' \
+  --status 200 \
+  --output my-html-capture.json
+```
+
+A golden example lives in [`examples/`](../../examples/) with a test that
+reproduces `expected-html-capture.json` byte for byte.
+
 ## Running
 
 From the repository root:

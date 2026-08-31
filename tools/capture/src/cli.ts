@@ -21,12 +21,20 @@ import { pathToFileURL } from "node:url";
 import {
   CaptureFile,
   CaptureValidationError,
+  HtmlCaptureFile,
 } from "./capture-file.js";
 import {
   Redactor,
   RedactorError,
   type RedactionResult,
 } from "./redactor.js";
+import {
+  captureHtml,
+  HtmlCaptureError,
+  type HtmlAllowlist,
+  type HtmlCaptureResult,
+  validateHtmlAllowlist,
+} from "./html-capture.js";
 
 /**
  * All CLI failures. Messages are fixed strings or contain only structural
@@ -402,14 +410,153 @@ export interface RunResult {
 }
 
 /**
- * Runs one capture command. Returns { code, message } instead of throwing so
- * tests and callers can inspect the outcome; messages only ever contain
- * fixed text or structural information, never input values.
+ * Shared output-write rules for both capture formats: an existing output is
+ * never silently overwritten, writing through a symlink is refused even with
+ * --force, and a non-regular file is refused.
+ */
+function writeOutput(
+  output: string,
+  outputPath: string,
+  force: boolean,
+  io: CliIo,
+): RunResult {
+  const stat = io.stat(outputPath);
+  if (stat.exists && stat.isSymlink) {
+    throw new CliError(
+      "OUTPUT",
+      "output path is a symlink; refusing to write through it",
+    );
+  }
+  if (stat.exists) {
+    if (!stat.isFile) {
+      throw new CliError("OUTPUT", "output path is not a regular file");
+    }
+    if (!force) {
+      throw new CliError(
+        "OUTPUT",
+        "output file already exists; pass --force to overwrite it explicitly",
+      );
+    }
+  }
+
+  io.writeFile(outputPath, output);
+  return { code: 0, message: "capture written" };
+}
+
+/**
+ * Runs one format-2 HTML structural capture command (ADR-002): reads the
+ * caller-named HTML page and allowlist, captures the allowlisted tables and
+ * pagination, and writes the format-2 envelope. Reuses the flag vocabulary,
+ * method/status/template validation, and the shared output-write rules of
+ * the format-1 path.
+ */
+function runHtmlCli(argv: readonly string[], io: CliIo): RunResult {
+  try {
+    const options = parseArgs(argv);
+
+    let allowlistText: string;
+    try {
+      allowlistText = io.readFile(options.allowlist);
+    } catch {
+      throw new CliError("FILE", "cannot read the --allowlist file");
+    }
+
+    let allowlistRaw: unknown;
+    try {
+      allowlistRaw = JSON.parse(allowlistText);
+    } catch {
+      throw new CliError("ALLOWLIST", "the --allowlist file is not valid JSON");
+    }
+
+    let allowlist: HtmlAllowlist;
+    try {
+      allowlist = validateHtmlAllowlist(allowlistRaw);
+    } catch (error) {
+      if (error instanceof HtmlCaptureError) {
+        throw error;
+      }
+      throw new CliError("ALLOWLIST", "the html allowlist is invalid");
+    }
+
+    let source: string;
+    try {
+      source = io.readFile(options.input);
+    } catch {
+      throw new CliError("FILE", "cannot read the --input file");
+    }
+
+    validateUrlTemplate(options.urlTemplate);
+    const method = normalizeMethod(options.method);
+    const status = parseStatus(options.status);
+
+    if (options.platform.length === 0) {
+      throw new CliError("PLATFORM", "must be a non-empty string");
+    }
+
+    let result: HtmlCaptureResult;
+    try {
+      result = captureHtml(source, allowlist);
+    } catch (error) {
+      if (error instanceof HtmlCaptureError) {
+        throw error;
+      }
+      throw new CliError("CAPTURE", "html capture failed");
+    }
+
+    let capture: HtmlCaptureFile;
+    try {
+      capture = HtmlCaptureFile.create({
+        platform: options.platform,
+        allowlistVersion: allowlist.version,
+        capturedAt: options.capturedAt,
+        requests: [
+          {
+            method,
+            urlTemplate: options.urlTemplate,
+            status,
+            tables: result.tables,
+            pagination: result.pagination,
+            unparsed: result.unparsed,
+          },
+        ],
+      });
+    } catch (error) {
+      if (error instanceof CaptureValidationError) {
+        throw error;
+      }
+      throw new CliError("CAPTURE", "capture validation failed");
+    }
+
+    const output = `${capture.toJson(2)}\n`;
+    return writeOutput(output, options.output, options.force, io);
+  } catch (error) {
+    if (
+      error instanceof CliError ||
+      error instanceof HtmlCaptureError ||
+      error instanceof CaptureValidationError
+    ) {
+      return { code: 1, message: error.message };
+    }
+    return { code: 1, message: "internal error (details omitted)" };
+  }
+}
+
+/**
+ * Runs one capture command. The first token, when it is the literal word
+ * `html`, switches to the format-2 HTML structural capture path; anything
+ * else is parsed by the format-1 redaction path. Returns { code, message }
+ * instead of throwing so tests and callers can inspect the outcome;
+ * messages only ever contain fixed text or structural information, never
+ * input values.
  */
 export function runCli(
   argv: readonly string[],
   io: CliIo = defaultIo,
 ): RunResult {
+  const first = argv[0];
+  if (first === "html") {
+    return runHtmlCli(argv.slice(1), io);
+  }
   try {
     const options = parseArgs(argv);
 
@@ -487,28 +634,7 @@ export function runCli(
     }
 
     const output = `${capture.toJson(2)}\n`;
-
-    const stat = io.stat(options.output);
-    if (stat.exists && stat.isSymlink) {
-      throw new CliError(
-        "OUTPUT",
-        "output path is a symlink; refusing to write through it",
-      );
-    }
-    if (stat.exists) {
-      if (!stat.isFile) {
-        throw new CliError("OUTPUT", "output path is not a regular file");
-      }
-      if (!options.force) {
-        throw new CliError(
-          "OUTPUT",
-          "output file already exists; pass --force to overwrite it explicitly",
-        );
-      }
-    }
-
-    io.writeFile(options.output, output);
-    return { code: 0, message: "capture written" };
+    return writeOutput(output, options.output, options.force, io);
   } catch (error) {
     if (
       error instanceof CliError ||

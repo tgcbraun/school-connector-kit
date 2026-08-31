@@ -1,0 +1,134 @@
+{
+  "capture_format": 2,
+  "platform": "kikom",
+  "allowlist_version": "synthetic-html-2025-06-15",
+  "captured_at": "2025-06-15T08:30:00Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/api/v1/schedule/{term}",
+      "status": 200,
+      "tables": [
+        {
+          "selector": {
+            "kind": "table",
+            "classes": [
+              "c-schedule"
+            ],
+            "row_attribute": "data-uid"
+          },
+          "classes": [
+            "c-schedule"
+          ],
+          "row_count": 5,
+          "rows_inspected": 3,
+          "column_count": 6,
+          "uniform": true,
+          "columns": [
+            {
+              "content_class": "empty",
+              "text_length": null,
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "text",
+              "text_length": {
+                "min": 12,
+                "max": 13
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 13,
+                "max": 16
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "date",
+              "text_length": {
+                "min": 8,
+                "max": 8
+              },
+              "date_format": {
+                "pattern": "DD.MM.YY (two-digit year)",
+                "matches": 3
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 22,
+                "max": 26
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 0,
+                "child": 3
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 5,
+                "max": 5
+              },
+              "date_format": {
+                "pattern": "DD.MM. (no year)",
+                "matches": 3
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            }
+          ],
+          "row_attributes": {
+            "data-state": 1,
+            "data-uid": 3
+          },
+          "query_parameters": {
+            "cHash": 9,
+            "tx_pi[client]": 3
+          }
+        }
+      ],
+      "pagination": [
+        {
+          "selector": {
+            "kind": "pagination",
+            "classes": [
+              "c-pager"
+            ]
+          },
+          "present": true,
+          "classes": [
+            "c-pager"
+          ],
+          "next_link_present": true
+        }
+      ],
+      "unparsed": 3
+    }
+  ]
+}

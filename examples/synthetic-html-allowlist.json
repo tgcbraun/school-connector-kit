@@ -1,0 +1,14 @@
+{
+  "version": "synthetic-html-2025-06-15",
+  "selectors": [
+    {
+      "kind": "table",
+      "classes": ["c-schedule"],
+      "row_attribute": "data-uid"
+    },
+    {
+      "kind": "pagination",
+      "classes": ["c-pager"]
+    }
+  ]
+}
