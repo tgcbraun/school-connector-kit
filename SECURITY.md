@@ -6,7 +6,7 @@ Do not report security vulnerabilities that contain personal school data,
 credentials, authentication tokens, session cookies, pupil identifiers, or
 other sensitive information in a public GitHub issue.
 
-Security issues should be reported privately to the project maintainer.
+Security issues should be reported through GitHub's private security advisory flow: file a private vulnerability report from the repository's Security tab instead of opening a public issue. Do not include credentials or real upstream responses in the report.
 
 ## Sensitive data
 

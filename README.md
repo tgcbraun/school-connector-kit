@@ -6,7 +6,20 @@ An open-source toolkit for integrating digital services used by schools in Germa
 
 Early development.
 
-The project is currently defining the connector contract, normalized school-data model, reference implementations, and privacy-safe capture tooling.
+The privacy-safe capture tooling is complete, and three structurally redacted, fully human-reviewed fixtures are committed (one per platform: WebUntis, DieSchulApp, and KIKOM). The normalized data model is schema 0.1, which is pre-1.0 and breaking changes are still expected. The connector runtime contract is committed and recorded in ADR-003 (`docs/architecture/ADR-003-CONNECTOR-RUNTIME-CONTRACT.md`). No connector implementations exist yet.
+
+## Getting started
+
+Node.js >= 22 is required, and the repository pins `packageManager` to `pnpm@11.24.0`.
+
+```
+pnpm install
+pnpm -r typecheck
+pnpm -r build
+pnpm -r test
+```
+
+`pnpm -r typecheck` passes with zero diagnostics. `pnpm -r test` runs 72 tests in `packages/core` and 158 tests in `tools/capture`.
 
 ## Germany-first
 
@@ -16,10 +29,10 @@ Its data model and connector APIs are designed around information commonly expos
 
 - Stundenplan and Vertretungsplan
 - Hausaufgaben
-- Klassenarbeiten and other assessments
+- Klassenarbeiten and other assessments (not modeled in schema 0.1)
 - Termine
 - Elternbriefe and school messages
-- Abwesenheiten and Krankmeldungen
+- Abwesenheiten and Krankmeldungen (not modeled in schema 0.1)
 - school-specific notifications
 
 German domain terminology may be retained where translating it would reduce precision.
@@ -60,20 +73,23 @@ Listing a platform here does not mean that a connector already exists.
 
 Real school data must never be required for public tests.
 
-Public tests use synthetic fixtures. Real captures may be used locally for acceptance testing but must remain outside version control.
+Public tests consume only synthetic data: the `examples/` directory contains synthetic example data only, and inputs defined inside the test files use clearly synthetic values.
+
+Real captures may be used locally for acceptance testing, but they must remain outside version control; `private-fixtures/` is Git-ignored.
+
+The fixtures committed under `fixtures/` are structure-only, human-reviewed captures; see `fixtures/README.md` for the promotion workflow and the mandatory review checklist.
 
 Capture tooling follows a deny-by-default approach: values may only leave a capture when explicitly permitted.
 
 ## Repository structure
 
 - `packages/core/` - shared connector contract and normalized models
-- `packages/connectors/` - platform-specific connectors
+- `packages/connectors/` - platform-specific connectors (none yet; the directory is empty)
 - `tools/` - developer utilities, including privacy-safe capture tooling
-- `schemas/` - public interchange schemas
-- `tests/contract/` - connector conformance tests
+- `schemas/` - placeholder (README only); the generated JSON Schema for schema 0.1 lives in `packages/core/schema/`
+- `tests/contract/` - placeholder (README only); it will hold connector conformance tests once a connector exists
 - `docs/` - architecture and contributor documentation
 - `examples/` - synthetic examples only
-- `private-fixtures/` - local private acceptance fixtures; Git ignored
 
 ## Design principle
 
