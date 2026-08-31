@@ -1,0 +1,10 @@
+{
+  "version": "kikom-2026-08-30-informationen",
+  "selectors": [
+    {
+      "kind": "table",
+      "classes": [],
+      "row_attribute": "data-uid"
+    }
+  ]
+}

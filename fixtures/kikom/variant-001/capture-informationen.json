@@ -1,0 +1,126 @@
+{
+  "capture_format": 2,
+  "platform": "kikom",
+  "allowlist_version": "kikom-2026-08-30-informationen",
+  "captured_at": "2026-08-31T10:06:44Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/kikom/verwaltung/informationen",
+      "status": 200,
+      "tables": [
+        {
+          "selector": {
+            "kind": "table",
+            "classes": [],
+            "row_attribute": "data-uid"
+          },
+          "classes": [
+            "c-margin-t-20",
+            "table",
+            "table-hover"
+          ],
+          "row_count": 15,
+          "rows_inspected": 3,
+          "has_header": true,
+          "column_count": 7,
+          "uniform": true,
+          "columns": [
+            {
+              "content_class": "empty",
+              "text_length": null,
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": null,
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 10,
+                "max": 29
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "date",
+              "text_length": {
+                "min": 8,
+                "max": 8
+              },
+              "date_format": {
+                "pattern": "DD.MM.YY (two-digit year)",
+                "matches": 3
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "text",
+              "text_length": {
+                "min": 1,
+                "max": 1
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "text",
+              "text_length": {
+                "min": 9,
+                "max": 18
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": null,
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            }
+          ],
+          "row_attributes": {
+            "data-permission-delete": 3,
+            "data-uid": 3
+          },
+          "query_parameters": {
+            "cHash": 9,
+            "tx_yfkikom_pi1%5Bclient%5D": 9,
+            "tx_yfkikominformation_information%5Baction%5D": 9,
+            "tx_yfkikominformation_information%5Bcontroller%5D": 9,
+            "tx_yfkikominformation_information%5Binformation%5D": 9
+          }
+        }
+      ],
+      "pagination": [],
+      "unparsed": 181
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "capture_format": 2,
+  "platform": "kikom",
+  "allowlist_version": "kikom-2026-08-30-termine",
+  "captured_at": "2026-08-31T10:11:05Z",
+  "requests": [
+    {
+      "method": "GET",
+      "url_template": "/kikom/verwaltung/termine",
+      "status": 200,
+      "tables": [
+        {
+          "selector": {
+            "kind": "table",
+            "classes": [],
+            "row_attribute": "data-uid"
+          },
+          "classes": [
+            "c-margin-t-20",
+            "table",
+            "table-hover",
+            "table-paginated"
+          ],
+          "row_count": 10,
+          "rows_inspected": 3,
+          "has_header": true,
+          "column_count": 4,
+          "uniform": true,
+          "columns": [
+            {
+              "content_class": "mixed",
+              "text_length": {
+                "min": 10,
+                "max": 10
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 0,
+                "child": 3
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 10,
+                "max": 78
+              },
+              "links": {
+                "present": 3,
+                "whole_cell": 0,
+                "child": 3
+              }
+            },
+            {
+              "content_class": "text",
+              "text_length": {
+                "min": 9,
+                "max": 12
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": null,
+              "links": {
+                "present": 3,
+                "whole_cell": 3,
+                "child": 0
+              }
+            }
+          ],
+          "row_attributes": {
+            "data-event-has-frequency": 3,
+            "data-permission-delete": 3,
+            "data-uid": 3
+          },
+          "query_parameters": {
+            "cHash": 9,
+            "tx_calendarize_calendar%5Bindex%5D": 9,
+            "tx_yfkikom_pi1%5Bclient%5D": 9
+          }
+        }
+      ],
+      "pagination": [
+        {
+          "selector": {
+            "kind": "pagination",
+            "classes": [
+              "c-content-pagination"
+            ],
+            "scopes": [
+              "c-pagination"
+            ]
+          },
+          "present": true,
+          "classes": [
+            "c-content-pagination",
+            "c-theme"
+          ],
+          "next_link_present": true
+        }
+      ],
+      "unparsed": 182
+    },
+    {
+      "method": "GET",
+      "url_template": "/kikom/verwaltung/termine",
+      "status": 200,
+      "tables": [
+        {
+          "selector": {
+            "kind": "table",
+            "classes": [],
+            "row_attribute": "data-uid"
+          },
+          "classes": [
+            "c-margin-t-20",
+            "table",
+            "table-hover",
+            "table-paginated"
+          ],
+          "row_count": 1,
+          "rows_inspected": 1,
+          "has_header": true,
+          "column_count": 4,
+          "uniform": true,
+          "columns": [
+            {
+              "content_class": "mixed",
+              "text_length": {
+                "min": 13,
+                "max": 13
+              },
+              "links": {
+                "present": 1,
+                "whole_cell": 0,
+                "child": 1
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": {
+                "min": 14,
+                "max": 14
+              },
+              "links": {
+                "present": 1,
+                "whole_cell": 0,
+                "child": 1
+              }
+            },
+            {
+              "content_class": "text",
+              "text_length": {
+                "min": 12,
+                "max": 12
+              },
+              "links": {
+                "present": 0,
+                "whole_cell": 0,
+                "child": 0
+              }
+            },
+            {
+              "content_class": "link",
+              "text_length": null,
+              "links": {
+                "present": 1,
+                "whole_cell": 1,
+                "child": 0
+              }
+            }
+          ],
+          "row_attributes": {
+            "data-event-has-frequency": 1,
+            "data-permission-delete": 1,
+            "data-uid": 1
+          },
+          "query_parameters": {
+            "cHash": 3,
+            "tx_calendarize_calendar%5B%40widget_0%5D%5BlastPage%5D": 3,
+            "tx_calendarize_calendar%5Bindex%5D": 3,
+            "tx_yfkikom_pi1%5Bclient%5D": 3
+          }
+        }
+      ],
+      "pagination": [
+        {
+          "selector": {
+            "kind": "pagination",
+            "classes": [
+              "c-content-pagination"
+            ],
+            "scopes": [
+              "c-pagination"
+            ]
+          },
+          "present": true,
+          "classes": [
+            "c-content-pagination",
+            "c-theme"
+          ],
+          "next_link_present": false
+        }
+      ],
+      "unparsed": 134
+    }
+  ]
+}

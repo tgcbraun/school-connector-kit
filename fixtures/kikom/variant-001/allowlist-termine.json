@@ -1,0 +1,15 @@
+{
+  "version": "kikom-2026-08-30-termine",
+  "selectors": [
+    {
+      "kind": "table",
+      "classes": [],
+      "row_attribute": "data-uid"
+    },
+    {
+      "kind": "pagination",
+      "classes": ["c-content-pagination"],
+      "scopes": ["c-pagination"]
+    }
+  ]
+}
