@@ -81,9 +81,12 @@ Per captured table:
 ```text
 selector            the selector used to reach it
 classes             class names on the element
-row_count           true count of data rows
-rows_inspected      capped at 3, mirroring the JSON array cap
-column_count        and whether uniform across rows
+row_count           true count of data rows: every <tr> under the table
+                    except the rows inside a <thead>
+rows_inspected      capped at 3, mirroring the JSON array cap; the cap
+                    applies to data rows, and header rows are never profiled
+has_header          whether rows inside a <thead> were present
+column_count        and whether uniform across data rows
 columns[]           per column index:
                       content_class   empty | text | link | date-shaped
                                       | time-shaped | mixed
