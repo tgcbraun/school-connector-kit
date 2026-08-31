@@ -20,6 +20,15 @@ export interface CaptureRequest {
   method: string;
   urlTemplate: string;
   status: number;
+  /**
+   * Optional platform-scoped logical call (ADR-004): an opaque,
+   * caller-supplied identifier naming the call within one platform
+   * (e.g. an RPC tunnel where every call shares one URL). Absent means the
+   * platform identifies calls by URL — a true statement, not a missing
+   * value. When present, only non-emptiness is validated here; the grammar
+   * of the identifier is the CLI's job (ADR-004 decision 4).
+   */
+  logicalCall?: string;
   redaction: RedactionResult;
 }
 
@@ -212,6 +221,11 @@ export class CaptureFile {
       requireNonEmptyString(`${prefix}.method`, request.method);
       requireNonEmptyString(`${prefix}.url_template`, request.urlTemplate);
       requireStatus(`${prefix}.status`, request.status);
+      if (request.logicalCall !== undefined) {
+        // ADR-004: the model only requires a non-empty string when present;
+        // the identifier grammar is enforced by the CLI (decision 4).
+        requireNonEmptyString(`${prefix}.logical_call`, request.logicalCall);
+      }
 
       const redaction = request.redaction;
       if (redaction === null || typeof redaction !== "object") {
@@ -243,20 +257,28 @@ export class CaptureFile {
   toJson(indent?: number): string {
     const { platform, allowlistVersion, capturedAt, requests } = this.input;
 
-    const serializedRequests = requests.map((request) => ({
-      method: request.method,
-      url_template: request.urlTemplate,
-      status: request.status,
-      shape: request.redaction.shape,
-      dropped_paths: [...request.redaction.droppedPaths].sort(
+    const serializedRequests = requests.map((request) => {
+      const serialized: Record<string, unknown> = {
+        method: request.method,
+        url_template: request.urlTemplate,
+        status: request.status,
+      };
+      if (request.logicalCall !== undefined) {
+        // ADR-004: the key is omitted entirely when the field is absent —
+        // never null, never the empty string.
+        serialized.logical_call = request.logicalCall;
+      }
+      serialized.shape = request.redaction.shape;
+      serialized.dropped_paths = [...request.redaction.droppedPaths].sort(
         compareStrings,
-      ),
-      array_lengths: Object.fromEntries(
+      );
+      serialized.array_lengths = Object.fromEntries(
         Object.entries(request.redaction.arrayLengths).sort(
           ([a], [b]) => compareStrings(a, b),
         ),
-      ),
-    }));
+      );
+      return serialized;
+    });
 
     const document = {
       capture_format: CAPTURE_FORMAT,

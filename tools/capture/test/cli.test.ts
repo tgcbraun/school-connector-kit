@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { defaultIo, runCli } from "../src/cli.js";
+import { CliError, defaultIo, runCli, validateLogicalCall } from "../src/cli.js";
 
 // All synthetic data below is deliberately fictional.
 
@@ -86,6 +86,11 @@ function baseArgs(overrides: Record<string, string> = {}): string[] {
     "--output",
     flag("output", join(dir, "out.json")),
   ];
+  if (overrides["logical-call"] !== undefined) {
+    // ADR-004: the flag is optional; appended only when an override supplies
+    // it, so `baseArgs()` still describes the flag-absent run.
+    args.push("--logical-call", overrides["logical-call"]);
+  }
   if ("force" in overrides) {
     args.push("--force");
   }
@@ -774,5 +779,199 @@ describe("capture CLI", () => {
         process.env.INIT_CWD = previous;
       }
     }
+  });
+});
+
+describe("logical-call flag (ADR-004)", () => {
+  beforeEach(() => {
+    write("in.json", JSON.stringify(SYNTHETIC_INPUT));
+    write("allowlist.json", JSON.stringify(SYNTHETIC_ALLOWLIST));
+  });
+
+  function parseOutput() {
+    return JSON.parse(readFileSync(join(dir, "out.json"), "utf8")) as {
+      requests: Array<Record<string, unknown>>;
+    };
+  }
+
+  it("omits logical_call from the output when the flag is not supplied", () => {
+    const result = runCli(baseArgs(), defaultIo);
+
+    expect(result.code).toBe(0);
+    expect(parseOutput().requests[0]!).not.toHaveProperty("logical_call");
+  });
+
+  it("carries a valid logical call through, immediately after status", () => {
+    const result = runCli(
+      baseArgs({ "logical-call": "get-letters" }),
+      defaultIo,
+    );
+
+    expect(result.code).toBe(0);
+    expect(parseOutput().requests[0]!.logical_call).toBe("get-letters");
+    expect(Object.keys(parseOutput().requests[0]!)).toEqual([
+      "method",
+      "url_template",
+      "status",
+      "logical_call",
+      "shape",
+      "dropped_paths",
+      "array_lengths",
+    ]);
+  });
+
+  it.each([
+    ["digit-led", "9letters"],
+    ["containing a dot", "get.letters"],
+    ["containing a space", "get letters"],
+    ["containing a slash", "get/letters"],
+  ])("rejects a %s logical call", (_label, value) => {
+    const result = runCli(baseArgs({ "logical-call": value }), defaultIo);
+
+    expect(result.code).toBe(1);
+    expect(result.message).toBe(
+      "must be a logical-call identifier: a letter-led name of letters, " +
+        "digits, hyphens, or underscores — no whitespace, no dots, no slashes",
+    );
+    expect(result.message).not.toContain(value);
+  });
+
+  it("rejects a duplicate --logical-call flag", () => {
+    const result = runCli(
+      [
+        ...baseArgs(),
+        "--logical-call",
+        "get-letters",
+        "--logical-call",
+        "letter-detail",
+      ],
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).toBe("duplicate option --logical-call");
+  });
+
+  it("never echoes a rejected logical call in the error message", () => {
+    const secret = "SECRET.label_9x";
+    const result = runCli(
+      baseArgs({ "logical-call": secret }),
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).not.toContain(secret);
+  });
+
+  it("rejects the empty flag value at the parse layer with a fixed message", () => {
+    const result = runCli(
+      [...baseArgs(), "--logical-call", ""],
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).toBe("option --logical-call requires a value");
+  });
+
+  it("rejects the empty string at the grammar level with code LOGICAL_CALL", () => {
+    let error: unknown = null;
+    try {
+      validateLogicalCall("");
+    } catch (thrown) {
+      error = thrown;
+    }
+
+    expect(error).toBeInstanceOf(CliError);
+    expect((error as CliError).code).toBe("LOGICAL_CALL");
+    expect((error as CliError).message).toBe(
+      "must be a logical-call identifier: a letter-led name of letters, " +
+        "digits, hyphens, or underscores — no whitespace, no dots, no slashes",
+    );
+  });
+});
+
+describe("logical-call flag on the html path", () => {
+  // Synthetic html-path fixtures, deliberately fictional and distinct from
+  // the html-cli suite's canaries.
+  const SYNTHETIC_PAGE = `<!DOCTYPE html>
+<html>
+<head><title>HTML_LC_PAGE_TITLE</title></head>
+<body>
+<table class="c-table">
+<tr data-uid="u1"><td>HTML_LC_CELL_ONE</td></tr>
+<tr data-uid="u2"><td>HTML_LC_CELL_TWO</td></tr>
+</table>
+</body>
+</html>
+`;
+
+  const SYNTHETIC_HTML_ALLOWLIST = {
+    version: "html-lc-test-1",
+    selectors: [{ kind: "table", classes: ["c-table"], row_attribute: "data-uid" }],
+  };
+
+  function htmlArgs(): string[] {
+    return [
+      "html",
+      "--input",
+      join(dir, "page.html"),
+      "--allowlist",
+      join(dir, "allowlist.json"),
+      "--platform",
+      "kikom",
+      "--captured-at",
+      "2025-06-15T08:30:00Z",
+      "--method",
+      "GET",
+      "--url-template",
+      "/api/v1/list/{token}",
+      "--status",
+      "200",
+      "--output",
+      join(dir, "out.json"),
+    ];
+  }
+
+  beforeEach(() => {
+    write("page.html", SYNTHETIC_PAGE);
+    write("allowlist.json", JSON.stringify(SYNTHETIC_HTML_ALLOWLIST));
+  });
+
+  it("rejects --logical-call with the fixed ARGUMENTS-style message", () => {
+    const result = runCli(
+      [...htmlArgs(), "--logical-call", "get-letters"],
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).toBe(
+      "option --logical-call is not supported on the html path",
+    );
+  });
+
+  it("never echoes a rejected --logical-call value on the html path", () => {
+    const secret = "SECRET.html_cell_8";
+    const result = runCli(
+      [...htmlArgs(), "--logical-call", secret],
+      defaultIo,
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.message).not.toContain(secret);
+    expect(result.message).toBe(
+      "option --logical-call is not supported on the html path",
+    );
+  });
+
+  it("succeeds unchanged on the html path when the flag is not supplied", () => {
+    const result = runCli(htmlArgs(), defaultIo);
+
+    expect(result.code).toBe(0);
+    const parsed = JSON.parse(readFileSync(join(dir, "out.json"), "utf8")) as {
+      capture_format: number;
+      requests: Array<Record<string, unknown>>;
+    };
+    expect(parsed.capture_format).toBe(2);
+    expect(parsed.requests[0]!).not.toHaveProperty("logical_call");
   });
 });

@@ -107,6 +107,7 @@ const FLAG_NAMES = [
   "captured-at",
   "method",
   "url-template",
+  "logical-call",
   "status",
   "output",
   "force",
@@ -123,9 +124,25 @@ export interface CliOptions {
   capturedAt: string;
   method: string;
   urlTemplate: string;
+  /**
+   * Optional `--logical-call` (ADR-004): names the logical call on platforms
+   * where calls are not identified by URL (e.g. an RPC tunnel). `""` means the
+   * flag was not supplied, in which case the capture request omits
+   * `logical_call` entirely — absence is a true statement, not an empty value.
+   * Used by the format-1 path only.
+   */
+  logicalCall: string;
   status: string;
   output: string;
   force: boolean;
+  /**
+   * Flag names (without the leading `--`) that appeared in argv. Lets each
+   * command path tell "the flag was supplied" apart from "the flag value is
+   * empty" — the case for optional flags (an empty `--logical-call` is
+   * rejected by the parser) — and flags a path does not support at all
+   * (the format-2 html path refuses `--logical-call` rather than ignoring it).
+   */
+  supplied: ReadonlySet<string>;
 }
 
 /**
@@ -195,9 +212,11 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     capturedAt: "",
     method: "",
     urlTemplate: "",
+    logicalCall: values.get("logical-call") ?? "",
     status: "",
     output: "",
     force: seen.has("force"),
+    supplied: seen,
   };
 
   if (inputs.length === 0) {
@@ -337,6 +356,26 @@ export function validateUrlTemplate(raw: string): void {
   }
 }
 
+const LOGICAL_CALL_PATTERN = /^[A-Za-z][A-Za-z0-9_-]*$/;
+
+/**
+ * Grammar for a logical call identifier (ADR-004 decision 4): letter-led,
+ * then letters, digits, hyphens or underscores. Anchored; no whitespace, no
+ * dots, no slashes. The model does not own the grammar — `capture-file.ts`
+ * checks only non-emptiness, so the model accepts identifiers its own CLI
+ * would reject, by design. The message is fixed: a logical call is
+ * caller-supplied data and is never echoed.
+ */
+export function validateLogicalCall(raw: string): void {
+  if (raw.length === 0 || !LOGICAL_CALL_PATTERN.test(raw)) {
+    throw new CliError(
+      "LOGICAL_CALL",
+      "must be a logical-call identifier: a letter-led name of letters, " +
+        "digits, hyphens, or underscores — no whitespace, no dots, no slashes",
+    );
+  }
+}
+
 export interface AllowlistDocument {
   version: string;
   rules: Array<{ path: string; mode: "keep" | "type" }>;
@@ -466,6 +505,18 @@ function writeOutput(
 function runHtmlCli(argv: readonly string[], io: CliIo): RunResult {
   try {
     const options = parseArgs(argv);
+
+    if (options.supplied.has("logical-call")) {
+      // ADR-004: `--logical-call` is a format-1 flag; the format-2 (html)
+      // path never captures a logical call. This CLI rejects input it does
+      // not use rather than silently discarding it, so the flag is refused
+      // here instead of ignored. Fixed message; the supplied value is never
+      // echoed.
+      throw new CliError(
+        "ARGUMENTS",
+        "option --logical-call is not supported on the html path",
+      );
+    }
 
     let allowlistText: string;
     try {
@@ -614,6 +665,13 @@ export function runCli(
     }
 
     validateUrlTemplate(options.urlTemplate);
+    if (options.supplied.has("logical-call")) {
+      // ADR-004: the flag is optional; when supplied, the grammar check here
+      // is the only validation the value gets — the model passes it through
+      // and only requires a non-empty string (decision 4). Format-1 path
+      // only; the format-2 (HTML) path does not use the flag.
+      validateLogicalCall(options.logicalCall);
+    }
     const method = normalizeMethod(options.method);
     const status = parseStatus(options.status);
 
@@ -645,6 +703,12 @@ export function runCli(
             method,
             urlTemplate: options.urlTemplate,
             status,
+            // ADR-004: logical_call is present only when the flag was
+            // supplied; when absent the field — and therefore the serialized
+            // key — is omitted entirely, never an empty string.
+            ...(options.supplied.has("logical-call")
+              ? { logicalCall: options.logicalCall }
+              : {}),
             redaction,
           },
         ],

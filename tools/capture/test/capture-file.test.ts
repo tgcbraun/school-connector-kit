@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   CaptureFile,
+  CaptureValidationError,
   type CaptureFileInput,
+  type CaptureRequest,
 } from "../src/capture-file.js";
 import { Redactor, type Allowlist } from "../src/redactor.js";
 
@@ -387,5 +389,88 @@ describe("capture pipeline security regression", () => {
       "data.teacher",
       "other",
     ]);
+  });
+});
+
+describe("logical_call (ADR-004)", () => {
+  function requestWith(
+    overrides: Partial<CaptureRequest> = {},
+  ): CaptureRequest {
+    return {
+      method: "POST",
+      urlTemplate: "/api/calls",
+      status: 200,
+      redaction: makeRedaction(),
+      ...overrides,
+    };
+  }
+
+  function parseOutput(file: CaptureFile) {
+    return JSON.parse(file.toJson()) as {
+      requests: Array<Record<string, unknown>>;
+    };
+  }
+
+  it("omits the logical_call key entirely when the field is absent", () => {
+    const file = CaptureFile.create(makeInput());
+
+    expect(parseOutput(file).requests[0]!).not.toHaveProperty(
+      "logical_call",
+    );
+    expect(file.toJson()).not.toContain("logical_call");
+  });
+
+  it("emits logical_call with the exact value, immediately after status", () => {
+    const file = CaptureFile.create(
+      makeInput({ requests: [requestWith({ logicalCall: "get-letters" })] }),
+    );
+
+    const request = parseOutput(file).requests[0]!;
+    expect(request.logical_call).toBe("get-letters");
+    expect(Object.keys(request)).toEqual([
+      "method",
+      "url_template",
+      "status",
+      "logical_call",
+      "shape",
+      "dropped_paths",
+      "array_lengths",
+    ]);
+  });
+
+  it("rejects an empty logical_call with the field-scoped message", () => {
+    let error: unknown = null;
+    try {
+      CaptureFile.create(
+        makeInput({ requests: [requestWith({ logicalCall: "" })] }),
+      );
+    } catch (thrown) {
+      error = thrown;
+    }
+
+    expect(error).toBeInstanceOf(CaptureValidationError);
+    expect((error as CaptureValidationError).message).toBe(
+      "requests[0].logical_call: must be a non-empty string",
+    );
+  });
+
+  it("rejects a non-string logical_call with the same message", () => {
+    let error: unknown = null;
+    try {
+      CaptureFile.create(
+        makeInput({
+          requests: [
+            { ...requestWith(), logicalCall: 42 } as unknown as CaptureRequest,
+          ],
+        }),
+      );
+    } catch (thrown) {
+      error = thrown;
+    }
+
+    expect(error).toBeInstanceOf(CaptureValidationError);
+    expect((error as CaptureValidationError).message).toBe(
+      "requests[0].logical_call: must be a non-empty string",
+    );
   });
 });
