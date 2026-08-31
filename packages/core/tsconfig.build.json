@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.buildtime.json",
   "compilerOptions": {
     "noEmit": false,
     "outDir": "dist",

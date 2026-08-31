@@ -3,11 +3,11 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": true,
-    "types": ["node"],
     "lib": ["ES2022"]
   },
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
+    "src/index.ts",
+    "src/schema.ts",
+    "src/connector/**/*.ts"
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    "src/document.ts",
+    "src/generate-json-schema.ts",
+    "test/**/*.ts"
+  ]
+}
