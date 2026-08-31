@@ -120,15 +120,21 @@ same canonical, deterministic serialization.
 - **No text content** is ever emitted: text is reported by code-point
   length only. **No attribute values** appear in the output except
   query-parameter *names* read from row anchor `href`s; URL paths and
-  parameter values stay out.
+  parameter values stay out. Before a name is read from an `href`, HTML
+  character references in it are decoded once (the five predefined entities
+  plus decimal/hex numeric references — no general entity table), and
+  percent-encodings in names are reported in wire form, exactly as written.
 - Selectors resolve structurally (tag + class containment + scope classes +
   optional row-attribute name) and must resolve to **exactly one** element;
   zero or multiple candidates fail closed. Analysis is confined to the
   resolved subtree by construction.
-- Tables report true `row_count` with at most 3 rows inspected
-  (`rows_inspected`); columns report a content class, a length range, a
-  shared date-shape pattern (pattern name + match count, never the text),
-  and whole-cell versus child anchor counts.
+- Tables report the true data-row `row_count` (rows inside a `<thead>` are
+  excluded; `has_header` reports their presence) with at most 3 **data** rows
+  inspected (`rows_inspected`); header rows are never profiled — column
+  profiles, row attributes, parameter names, and width statistics all derive
+  from data rows. Columns report a content class, a length range, a shared
+  date-shape pattern (pattern name + match count, never the text), and
+  whole-cell versus child anchor counts.
 - Pagination containers report presence, classes, and whether the fixed
   v1 next-link rule (a `c-next` list item holding an anchor) matches.
 - `unparsed` counts tags outside a fixed whitelist per request; the key is

@@ -389,7 +389,9 @@ function assertSelector(
   if (record.kind !== kind) {
     throw new CaptureValidationError(`${field}.kind`, `must be "${kind}"`);
   }
-  requireStringArray(`${field}.classes`, record.classes, true);
+  // `classes` may be empty: a zero-class selector is the unscoped tag
+  // selector of the ADR-002 §1 evidence, accepted by the capture grammar.
+  requireStringArray(`${field}.classes`, record.classes, false);
   if ("scopes" in record) {
     requireStringArray(`${field}.scopes`, record.scopes, true);
   }
@@ -475,6 +477,7 @@ function assertTable(field: string, value: unknown): void {
     "classes",
     "row_count",
     "rows_inspected",
+    "has_header",
     "column_count",
     "uniform",
     "columns",
@@ -485,6 +488,7 @@ function assertTable(field: string, value: unknown): void {
   requireStringArray(`${field}.classes`, record.classes, false);
   requireNonNegativeInt(`${field}.row_count`, record.row_count);
   requireNonNegativeInt(`${field}.rows_inspected`, record.rows_inspected);
+  requireBoolean(`${field}.has_header`, record.has_header);
   requireNonNegativeInt(`${field}.column_count`, record.column_count);
   requireBoolean(`${field}.uniform`, record.uniform);
   if (!Array.isArray(record.columns)) {
@@ -561,6 +565,7 @@ function canonicalTable(value: unknown): Record<string, unknown> {
     classes: canonicalClasses(record.classes as readonly string[]),
     row_count: record.row_count,
     rows_inspected: record.rows_inspected,
+    has_header: record.has_header,
     column_count: record.column_count,
     uniform: record.uniform,
     columns: (record.columns as readonly unknown[]).map(canonicalColumn),

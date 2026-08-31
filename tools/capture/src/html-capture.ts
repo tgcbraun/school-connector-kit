@@ -20,6 +20,11 @@
  *   structural deviation (unmatched or unclosed tag, unterminated comment
  *   or doctype, tag cut off at end of input, nested tags inside an open
  *   tag) fails closed with a fixed PARSE message.
+ * - Raw-text elements (HTML5 raw text and escapable raw text: `script`,
+ *   `style`, `textarea`, `title`) hold their content until the matching end
+ *   tag; `<` inside never opens a tag. The content never enters the parsed
+ *   tree and never reaches output; an unterminated raw-text element fails
+ *   closed with a fixed PARSE message.
  * - Selectors resolve structurally over the parsed tree: tag + class
  *   containment + ancestor scope classes + optional row attribute name. A
  *   selector with zero or more than one candidate fails closed with a
@@ -27,8 +32,18 @@
  * - Analysis is confined by construction to the resolved element's
  *   subtree: nothing outside the selected element contributes to any
  *   payload field.
- * - Rows are capped at three (first, document order); `row_count` always
- *   reports the true count.
+ * - Rows are capped at three (first data rows, document order); `row_count`
+ *   reports the true count of data rows: every `<tr>` under the table except
+ *   the rows inside a `<thead>`, and `has_header` states whether such a
+ *   header was present. Header rows are never profiled: the column
+ *   profiles, `row_attributes`, `query_parameters`, `column_count`, and
+ *   `uniform` are all derived from data rows only.
+ * - Query-parameter names are reported in wire form: percent-encodings in
+ *   a name are reported exactly as they appear on the wire (never
+ *   percent-decoded). Before a name or separator is recognized, HTML
+ *   character references in the href are decoded once, using only the five
+ *   predefined entities (amp/lt/gt/quot/apos) plus decimal and hex numeric
+ *   references; no general named-entity table exists.
  * - `unparsed` counts tags outside the whitelist across the whole document
  *   (page chrome — html/head/body/meta/title/link — is whitelisted;
  *   content such as p/span/input/nav is not).
@@ -80,6 +95,7 @@ export interface HtmlTableCapture {
   readonly classes: readonly string[];
   readonly row_count: number;
   readonly rows_inspected: number;
+  readonly has_header: boolean;
   readonly column_count: number;
   readonly uniform: boolean;
   readonly columns: readonly HtmlColumnCapture[];
@@ -119,6 +135,11 @@ interface HtmlElement {
   parent: HtmlElement | null;
 }
 
+/**
+ * Void element set: the HTML5 spec void list plus `param` (still treated as
+ * void by browsers; requiring an explicit close would build a tree that
+ * diverges from the real DOM).
+ */
 const VOID_TAGS: ReadonlySet<string> = new Set([
   "area",
   "base",
@@ -134,6 +155,19 @@ const VOID_TAGS: ReadonlySet<string> = new Set([
   "source",
   "track",
   "wbr",
+]);
+
+/**
+ * Raw-text elements: HTML5 raw text (`script`, `style`) and escapable
+ * raw text (`textarea`, `title`). The parser performs no entity decoding,
+ * so all four behave identically: content runs to the matching end tag
+ * and a `<` inside never opens a tag.
+ */
+const RAW_TEXT_TAGS: ReadonlySet<string> = new Set([
+  "script",
+  "style",
+  "textarea",
+  "title",
 ]);
 
 /**
@@ -273,7 +307,7 @@ class Parser {
       const parent = top();
       const element = this.parseOpenTag(parent);
       parent.children.push(element);
-      if (!VOID_TAGS.has(element.tag)) {
+      if (!VOID_TAGS.has(element.tag) && !RAW_TEXT_TAGS.has(element.tag)) {
         stack.push(element);
       }
     }
@@ -334,7 +368,20 @@ class Parser {
         failParse("nested tag inside an open tag");
       }
       if (ch === "/") {
-        failParse("self-closing slash is not part of the v1 grammar");
+        // A trailing slash is accepted ONLY on a void element (see
+        // VOID_TAGS) and ONLY immediately before the closing '>' — with or
+        // without preceding whitespace, which the loop above already
+        // consumed. It is a no-op: the element is void regardless and the
+        // slash carries no meaning. On any non-void element — or anywhere
+        // except immediately before '>' — fail closed: HTML5 ignores the
+        // slash there, and treating it as self-closing would build a tree
+        // that diverges from the real DOM.
+        const next = i + 1 < this.source.length ? this.source.charAt(i + 1) : "";
+        if (!VOID_TAGS.has(tag) || next !== ">") {
+          failParse("self-closing slash is not part of the v1 grammar");
+        }
+        i += 2;
+        break;
       }
       if (!isAlpha(ch)) {
         failParse("malformed attribute name");
@@ -399,6 +446,9 @@ class Parser {
       }
     }
     this.pos = i;
+    if (RAW_TEXT_TAGS.has(tag)) {
+      this.consumeRawText(tag);
+    }
     return {
       type: "element",
       tag,
@@ -408,6 +458,49 @@ class Parser {
       children: [],
       parent,
     };
+  }
+
+  /**
+   * Consume the raw-text content of an element up to and including its
+   * matching end tag. Per the HTML5 raw-text end condition, the end tag
+   * is `</` + the tag name (case-insensitive) followed by whitespace, `/`,
+   * or `>`. The content is inert: it is never decoded, never enters the
+   * parsed tree, and never reaches output. Advances `this.pos` past the
+   * end tag's closing `>`.
+   */
+  private consumeRawText(tag: string): void {
+    const lower = this.source.toLowerCase();
+    const pat = `</${tag}`;
+    let found = lower.indexOf(pat, this.pos);
+    while (found !== -1) {
+      const afterName = found + 2 + tag.length;
+      if (afterName < lower.length) {
+        const ch = lower.charAt(afterName);
+        if (ch === ">") {
+          this.pos = afterName + 1;
+          return;
+        }
+        if (isSpace(ch)) {
+          const gt = lower.indexOf(">", afterName);
+          const region = lower.slice(afterName, gt === -1 ? lower.length : gt);
+          if (gt === -1 || region.includes("<")) {
+            failParse("malformed end tag in raw text element");
+          }
+          this.pos = gt + 1;
+          return;
+        }
+        if (ch === "/") {
+          const afterSlash = afterName + 1;
+          if (afterSlash >= lower.length || lower.charAt(afterSlash) !== ">") {
+            failParse("malformed end tag in raw text element");
+          }
+          this.pos = afterSlash + 1;
+          return;
+        }
+      }
+      found = lower.indexOf(pat, found + 1);
+    }
+    failParse(`unterminated raw text element: ${tag}`);
   }
 }
 
@@ -537,6 +630,7 @@ function requireNonEmptyString(value: unknown, what: string): string {
   return value;
 }
 
+/** Accepts a non-empty string array; used for scopes and similar lists. */
 function requireNonEmptyStringArray(value: unknown, what: string): readonly string[] {
   if (
     !Array.isArray(value) ||
@@ -544,6 +638,22 @@ function requireNonEmptyStringArray(value: unknown, what: string): readonly stri
     !value.every((item) => typeof item === "string" && item.length > 0)
   ) {
     failAllowlist(`${what} must be a non-empty array of non-empty strings`);
+  }
+  return value as readonly string[];
+}
+
+/**
+ * The `classes` key is required (shape parity across selectors) but the list
+ * may be empty: a zero-class selector is the unscoped tag selector of the
+ * ADR-002 §1 evidence (a bare `<table>` on a single-table page). Every name
+ * that is present must still be a non-empty string.
+ */
+function requireStringArray(value: unknown, what: string): readonly string[] {
+  if (
+    !Array.isArray(value) ||
+    !value.every((item) => typeof item === "string" && item.length > 0)
+  ) {
+    failAllowlist(`${what} must be an array of non-empty strings`);
   }
   return value as readonly string[];
 }
@@ -584,7 +694,7 @@ function validateSelector(raw: unknown, index: number): HtmlSelectorEntry {
   if (kind !== "table" && kind !== "pagination") {
     failAllowlist(`selector [${index}] has an unknown kind`);
   }
-  const classes = requireNonEmptyStringArray(
+  const classes = requireStringArray(
     record.classes,
     `selector [${index}] classes`,
   );
@@ -796,7 +906,70 @@ function classifyCell(text: string, hasLink: boolean): string {
   return "text";
 }
 
+/**
+ * The bounded HTML character-reference surface: the five predefined
+ * entities plus the shape of decimal and hex numeric references. There is
+ * deliberately no general named-entity table.
+ */
+const PREDEFINED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: "\"",
+  apos: "'",
+};
+
+function decodeNumericReference(body: string): string | undefined {
+  const isHex = body.startsWith("#x") || body.startsWith("#X");
+  const digits = isHex ? body.slice(2) : body.slice(1);
+  if (digits.length === 0) {
+    return undefined;
+  }
+  if (!new RegExp(`^[0-9${isHex ? "a-fA-F" : ""}]+$`).test(digits)) {
+    return undefined;
+  }
+  const code = Number.parseInt(digits, isHex ? 16 : 10);
+  if (!Number.isSafeInteger(code) || code < 0 || code > 0x10FFFF) {
+    return undefined;
+  }
+  return String.fromCodePoint(code);
+}
+
+/**
+ * Decode HTML character references in a string, in a single pass and only
+ * for the bounded surface above: the five predefined entities and decimal /
+ * hex numeric character references. Every other `&...;` sequence is left
+ * exactly as written. Used only for attribute values parsed as URLs.
+ */
+function decodeHtmlReferences(value: string): string {
+  let out = "";
+  let i = 0;
+  while (i < value.length) {
+    const ch = value.charAt(i);
+    if (ch === "&") {
+      const semi = value.indexOf(";", i + 1);
+      if (semi !== -1) {
+        const body = value.slice(i + 1, semi);
+        const decoded = body.startsWith("#")
+          ? decodeNumericReference(body)
+          : PREDEFINED_ENTITIES[body];
+        if (decoded !== undefined) {
+          out += decoded;
+          i = semi + 1;
+          continue;
+        }
+      }
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
+
 function queryParameterNames(href: string): string[] {
+  // The value is parsed as a URL: decode character references first, then
+  // parse. Names are reported in wire form (no percent-decoding).
+  href = decodeHtmlReferences(href);
   const question = href.indexOf("?");
   if (question === -1) {
     return [];
@@ -885,10 +1058,24 @@ function echoSelector(entry: HtmlSelectorEntry): HtmlSelectorEntry {
 
 function analyzeTable(el: HtmlElement, entry: HtmlSelectorEntry): HtmlTableCapture {
   const rows = [...descendants(el)].filter((d) => d.tag === "tr");
-  const rowCount = rows.length;
-  const inspected = rows.slice(0, ROW_INSPECTION_CAP);
+  /** True when the row sits inside a `<thead>` of this table. */
+  const inHeader = (row: HtmlElement): boolean => {
+    let parent = row.parent;
+    while (parent !== null && parent !== el) {
+      if (parent.tag === "thead") {
+        return true;
+      }
+      parent = parent.parent;
+    }
+    return false;
+  };
+  const dataRows = rows.filter((row) => !inHeader(row));
+  const hasHeader = rows.some((row) => inHeader(row));
+  // The inspection cap applies to data rows only: header rows are never
+  // profiled (length ranges, classes, dates, row attributes, parameters).
+  const inspected = dataRows.slice(0, ROW_INSPECTION_CAP);
 
-  const widths = rows.map((row) => cellElements(row).length);
+  const widths = dataRows.map((row) => cellElements(row).length);
   const columnCount = widths.length === 0 ? 0 : Math.max(...widths);
   const uniform = widths.every((width) => width === columnCount);
 
@@ -935,8 +1122,9 @@ function analyzeTable(el: HtmlElement, entry: HtmlSelectorEntry): HtmlTableCaptu
   return {
     selector: echoSelector(entry),
     classes: [...el.classes].sort(compareStrings),
-    row_count: rowCount,
+    row_count: dataRows.length,
     rows_inspected: inspected.length,
+    has_header: hasHeader,
     column_count: columnCount,
     uniform,
     columns,

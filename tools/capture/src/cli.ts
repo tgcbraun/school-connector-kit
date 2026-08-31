@@ -113,7 +113,11 @@ const FLAG_NAMES = [
 ] as const;
 
 export interface CliOptions {
-  input: string;
+  /**
+   * `--input` values in command-line order. `--input` is the only repeatable
+   * flag; every other flag may only be given once.
+   */
+  inputs: readonly string[];
   allowlist: string;
   platform: string;
   capturedAt: string;
@@ -126,12 +130,14 @@ export interface CliOptions {
 
 /**
  * Strict flag parsing: two-token `--flag value` form only, no unknown flags,
- * no duplicates, no missing values. A bare `--` (end-of-options separator,
- * passed through by npm/pnpm script invocations) is accepted and ignored.
+ * no duplicates (except `--input`, which repeats in order), no missing
+ * values. A bare `--` (end-of-options separator, passed through by
+ * npm/pnpm script invocations) is accepted and ignored.
  * Messages name the flag only — never a supplied value.
  */
 export function parseArgs(argv: readonly string[]): CliOptions {
   const values = new Map<string, string>();
+  const inputs: string[] = [];
   const seen = new Set<string>();
 
   for (let i = 0; i < argv.length; i++) {
@@ -148,7 +154,7 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     if (!(FLAG_NAMES as readonly string[]).includes(name)) {
       throw new CliError("ARGUMENTS", `unknown option --${name}`);
     }
-    if (seen.has(name)) {
+    if (name !== "input" && seen.has(name)) {
       throw new CliError("ARGUMENTS", `duplicate option --${name}`);
     }
     seen.add(name);
@@ -165,11 +171,14 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     if (value.length === 0) {
       throw new CliError("ARGUMENTS", `option --${name} requires a value`);
     }
-    values.set(name, value);
+    if (name === "input") {
+      inputs.push(value);
+    } else {
+      values.set(name, value);
+    }
   }
 
   const required = [
-    ["input", "input"],
     ["allowlist", "allowlist"],
     ["platform", "platform"],
     ["captured-at", "capturedAt"],
@@ -180,7 +189,7 @@ export function parseArgs(argv: readonly string[]): CliOptions {
   ] as const;
 
   const options: CliOptions = {
-    input: "",
+    inputs,
     allowlist: "",
     platform: "",
     capturedAt: "",
@@ -190,6 +199,10 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     output: "",
     force: seen.has("force"),
   };
+
+  if (inputs.length === 0) {
+    throw new CliError("ARGUMENTS", "missing required option --input");
+  }
 
   for (const [flag, field] of required) {
     const value = values.get(flag);
@@ -478,13 +491,6 @@ function runHtmlCli(argv: readonly string[], io: CliIo): RunResult {
       throw new CliError("ALLOWLIST", "the html allowlist is invalid");
     }
 
-    let source: string;
-    try {
-      source = io.readFile(options.input);
-    } catch {
-      throw new CliError("FILE", "cannot read the --input file");
-    }
-
     validateUrlTemplate(options.urlTemplate);
     const method = normalizeMethod(options.method);
     const status = parseStatus(options.status);
@@ -493,15 +499,34 @@ function runHtmlCli(argv: readonly string[], io: CliIo): RunResult {
       throw new CliError("PLATFORM", "must be a non-empty string");
     }
 
-    let result: HtmlCaptureResult;
-    try {
-      result = captureHtml(source, allowlist);
-    } catch (error) {
-      if (error instanceof HtmlCaptureError) {
-        throw error;
+    // One request per --input, in command-line order, all under the same
+    // capture-level allowlist identity. Any input that fails to resolve
+    // uniquely fails the whole run (ADR-002 §9 fail-closed).
+    const requests = options.inputs.map((inputPath) => {
+      let source: string;
+      try {
+        source = io.readFile(inputPath);
+      } catch {
+        throw new CliError("FILE", "cannot read the --input file");
       }
-      throw new CliError("CAPTURE", "html capture failed");
-    }
+      let result: HtmlCaptureResult;
+      try {
+        result = captureHtml(source, allowlist);
+      } catch (error) {
+        if (error instanceof HtmlCaptureError) {
+          throw error;
+        }
+        throw new CliError("CAPTURE", "html capture failed");
+      }
+      return {
+        method,
+        urlTemplate: options.urlTemplate,
+        status,
+        tables: result.tables,
+        pagination: result.pagination,
+        unparsed: result.unparsed,
+      };
+    });
 
     let capture: HtmlCaptureFile;
     try {
@@ -509,16 +534,7 @@ function runHtmlCli(argv: readonly string[], io: CliIo): RunResult {
         platform: options.platform,
         allowlistVersion: allowlist.version,
         capturedAt: options.capturedAt,
-        requests: [
-          {
-            method,
-            urlTemplate: options.urlTemplate,
-            status,
-            tables: result.tables,
-            pagination: result.pagination,
-            unparsed: result.unparsed,
-          },
-        ],
+        requests,
       });
     } catch (error) {
       if (error instanceof CaptureValidationError) {
@@ -559,6 +575,13 @@ export function runCli(
   }
   try {
     const options = parseArgs(argv);
+    if (options.inputs.length > 1) {
+      throw new CliError("ARGUMENTS", "duplicate option --input");
+    }
+    const inputPath = options.inputs[0];
+    if (inputPath === undefined) {
+      throw new CliError("ARGUMENTS", "missing required option --input");
+    }
 
     let allowlistText: string;
     try {
@@ -578,7 +601,7 @@ export function runCli(
 
     let inputText: string;
     try {
-      inputText = io.readFile(options.input);
+      inputText = io.readFile(inputPath);
     } catch {
       throw new CliError("FILE", "cannot read the --input file");
     }

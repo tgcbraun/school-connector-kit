@@ -684,6 +684,13 @@ describe("capture CLI", () => {
     expect(duplicate.code).toBe(1);
     expect(duplicate.message).toContain("duplicate option");
 
+    const duplicateInput = runCli(
+      [...baseArgs(), "--input", join(dir, "in.json")],
+      defaultIo,
+    );
+    expect(duplicateInput.code).toBe(1);
+    expect(duplicateInput.message).toContain("duplicate option --input");
+
     const valueless = runCli(
       [...baseArgs().slice(0, -1), "--output"],
       defaultIo,

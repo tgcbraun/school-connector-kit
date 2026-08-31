@@ -27,6 +27,7 @@ function sampleTable(reversedKeyMaps: boolean): HtmlTableCapture {
     classes: ["c-table"],
     row_count: 5,
     rows_inspected: 3,
+    has_header: false,
     column_count: 2,
     uniform: true,
     columns: [
@@ -91,6 +92,7 @@ const CANONICAL_UNPARSED = JSON.stringify(
             classes: ["c-table"],
             row_count: 5,
             rows_inspected: 3,
+            has_header: false,
             column_count: 2,
             uniform: true,
             columns: [
@@ -261,6 +263,17 @@ describe("HtmlCaptureFile (capture_format 2)", () => {
     {
       const table = makeTable();
       table.row_count = -3;
+      expectRejected(baseRequest(table));
+    }
+    {
+      const table = makeTable();
+      // Missing required key is rejected by the exact-key rule.
+      delete (table as unknown as Record<string, unknown>)["has_header"];
+      expectRejected(baseRequest(table));
+    }
+    {
+      const table = makeTable();
+      table.has_header = "yes" as unknown as boolean;
       expectRejected(baseRequest(table));
     }
     {

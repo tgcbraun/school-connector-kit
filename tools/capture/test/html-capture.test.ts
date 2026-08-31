@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -354,12 +354,103 @@ it("refuses a kind mismatch: a table selector never resolves a pagination contai
   );
 });
 
+it("resolves a zero-class (unscoped) table selector to the sole bare table", () => {
+  const source = page(
+    `<div>CHROME_TEXT_CANARY_X1</div>` +
+      `<table><tr data-uid="R1"><td>CELL_ONE_7</td></tr></table>` +
+      `<ul>LIST_TEXT_CANARY_X2</ul>`,
+  );
+  const table = capture(source, { kind: "table", classes: [] }) as {
+    classes: string[];
+    row_count: number;
+    selector: { classes: string[] };
+  };
+  expect(table.row_count).toBe(1);
+  expect(table.classes).toEqual([]);
+  expect(table.selector.classes).toEqual([]);
+});
+
+it("fails closed when a zero-class table selector matches more than one table", () => {
+  const source = page(
+    `<table><tr><td>TABLE_A_CELL_6</td></tr></table>` +
+      `<table><tr><td>TABLE_B_CELL_6</td></tr></table>`,
+  );
+  expectHtmlError(
+    () => capture(source, { kind: "table", classes: [] }),
+    "SELECTOR",
+  );
+});
+
+it("accepts a trailing slash on void elements, with or without preceding whitespace", () => {
+  const withWhitespace = page(
+    `<div><br /></div><div><img /></div>` +
+      `<table class="t"><tr><td>VOID_ONE_19</td></tr></table>`,
+  );
+  const noWhitespace = page(
+    `<div><br/></div><div><img/></div>` +
+      `<table class="t"><tr><td>VOID_ONE_19</td></tr></table>`,
+  );
+  for (const source of [withWhitespace, noWhitespace]) {
+    const table = capture(source, { kind: "table", classes: ["t"] }) as {
+      row_count: number;
+    };
+    expect(table.row_count).toBe(1);
+  }
+});
+
+it("accepts the slash no-op form for every void tag name in the HTML5 spec set", () => {
+  const voidTags = [
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "source",
+    "track",
+    "wbr",
+  ];
+  for (const tag of voidTags) {
+    for (const whitespace of [" ", ""]) {
+      const source = page(
+        `<${tag}${whitespace}/>` +
+          `<table class="t"><tr><td>VOID_SET_12</td></tr></table>`,
+      );
+      const table = capture(source, { kind: "table", classes: ["t"] }) as {
+        row_count: number;
+      };
+      expect(table.row_count).toBe(1);
+    }
+  }
+});
+
+it("fails closed on a trailing slash of a non-void element, and on a non-trailing slash", () => {
+  const entry: Entry = { kind: "table", classes: ["t"] };
+  const body = `<table class="t"><tr><td>SLASH_FAIL_8</td></tr></table>`;
+  for (const tag of ["div", "table", "td", "a", "li", "script"]) {
+    expectHtmlError(
+      () => capture(page(`<${tag} />` + body), entry),
+      "PARSE",
+      "SLASH_FAIL_8",
+    );
+  }
+  for (const form of ["<br / >", "<br//>", "<br/ >", "<a href=\"/x\"/>", "<x-1 />"]) {
+    expectHtmlError(
+      () => capture(page(form + body), entry),
+      "PARSE",
+    );
+  }
+});
+
 it("refuses allowlists with a keep mode, unknown keys, or empty selector lists", () => {
   for (const allowlist of [
     { version: "v", selectors: [{ kind: "table", classes: ["t"], mode: "keep" }] },
     { version: "v", selectors: [{ kind: "table", classes: ["t"], extra: 1 }] },
     { version: "v", selectors: [{ kind: "table" }] },
-    { version: "v", selectors: [{ kind: "table", classes: [] }] },
     { version: "v", selectors: [] },
   ]) {
     expectHtmlError(
@@ -609,4 +700,288 @@ it("loads the synthetic canonical fixture from disk for the golden path", () => 
     selectors: [canonicalEntry()],
   });
   expect(result.tables[0]).toBeDefined();
+});
+
+describe("raw text elements (HTML5 raw text + escapable raw text)", () => {
+  const entry: Entry = { kind: "table", classes: ["t"] };
+  const realTable =
+    `<table class="t" data-grid="raw-1">` +
+    `<tr data-uid="r-01"><td>CELL_A</td><td><a href="/x?cHash=1">LK</a></td></tr>` +
+    `<tr data-uid="r-02"><td>CELL_B</td><td><a href="/x?cHash=2&other=4">LK</a></td></tr>` +
+    `</table>`;
+
+  it("a < inside style and script content does not open a tag", () => {
+    const source = page(
+      `<style>a { content: "<div class=decoy>" }</style>` +
+        `<script>if (a < b) { x("<td>RAW_NO_TAG</td>"); }</script>` +
+        realTable
+    );
+    expect(capture(source, entry)).toBeDefined();
+  });
+
+  it("the legacy CDATA wrapper form inside style parses inert", () => {
+    const source = page(
+      `<style>/*<![CDATA[` +
+        `body { margin: 0; color: "#888" }` +
+        `/*]]>*/</style>` +
+        realTable
+    );
+    expect(capture(source, entry)).toBeDefined();
+  });
+
+  it("end-tag matching is case-insensitive and accepts whitespace and slash terminators", () => {
+    expect(capture(page(`<STYLE>RAW_CONTENT_ONE</STYLE>` + realTable), entry)).toBeDefined();
+    expect(capture(page(`<style>RAW_CONTENT_TWO</style >` + realTable), entry)).toBeDefined();
+    expect(capture(page(`<script>RAW_CONTENT_THREE</Script/>` + realTable), entry)).toBeDefined();
+  });
+
+  it("consumes content for all four raw-text elements, so inner markup stays inert", () => {
+    const source = page(
+      `<textarea>INERT <table class="t"><tr data-uid="z"></tr></table></textarea>` +
+        `<style>.t { inner: "<td>" }</style>` +
+        realTable
+    );
+    expect(capture(source, entry)).toBeDefined();
+  });
+
+  it("an unterminated raw-text element fails closed, without its content in the message", () => {
+    for (const [tag, canary] of [
+      ["style", "STYLE_UNTERM_CANARY"],
+      ["script", "SCRIPT_UNTERM_CANARY"],
+      ["textarea", "TEXTAREA_UNTERM_CANARY"],
+    ] as const) {
+      expectHtmlError(
+        () => capture(page(`<${tag}>${canary}`), entry),
+        "PARSE",
+        canary,
+      );
+    }
+    expectHtmlError(
+      () =>
+        captureHtml(
+          `<!DOCTYPE html><html><head><meta charset="utf-8"><title>TITLE_UNTERM_CANARY`,
+          { version: "t-1", selectors: [entry] },
+        ),
+      "PARSE",
+      "TITLE_UNTERM_CANARY",
+    );
+  });
+
+  it("raw-text content never reaches capture output", () => {
+    const source =
+      `<!DOCTYPE html><html><head><meta charset="utf-8">` +
+      `<title>RW_CANARY_TITLE_TEXT</title></head><body>` +
+      `<style>RW_CANARY_STYLE_TEXT a { content: "<td>" }</style>` +
+      `<script>RW_CANARY_SCRIPT_TEXT x("<b>");</script>` +
+      `<textarea>RW_CANARY_TEXTAREA_TEXT</textarea>` +
+      realTable +
+      `</body></html>`;
+    const result = captureHtml(source, { version: "t-1", selectors: [entry] });
+    expect(result.tables.length).toBe(1);
+    const serialized = JSON.stringify(result);
+    for (const canary of [
+      "RW_CANARY_TITLE_TEXT",
+      "RW_CANARY_STYLE_TEXT",
+      "RW_CANARY_SCRIPT_TEXT",
+      "RW_CANARY_TEXTAREA_TEXT",
+    ]) {
+      expect(serialized).not.toContain(canary);
+    }
+  });
+});
+
+describe("capture review defect pins", () => {
+  const entry: Entry = { kind: "table", classes: ["t"] };
+
+  it("entity-encoded query separators decode to clean parameter names", () => {
+    const source = page(
+      `<table class="t">` +
+        `<tr data-uid="1"><td><a href="/p?&amp;a=1&amp;b=2">L</a></td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as { query_parameters: Record<string, number> };
+    expect(table.query_parameters).toEqual({ a: 1, b: 1 });
+  });
+
+  it("numeric character references decode in URL hrefs, decimal and hex", () => {
+    const hex = page(
+      `<table class="t">` +
+        `<tr data-uid="1"><td><a href="/p?a=1&#x26;cHash=3">L</a></td></tr>` +
+        `</table>`
+    );
+    const hexTable = capture(hex, entry) as { query_parameters: Record<string, number> };
+    expect(hexTable.query_parameters).toEqual({ a: 1, cHash: 1 });
+
+    const dec = page(
+      `<table class="t">` +
+        `<tr data-uid="1"><td><a href="/p?a=1&#38;d4=2">L</a></td></tr>` +
+        `</table>`
+    );
+    const decTable = capture(dec, entry) as { query_parameters: Record<string, number> };
+    expect(decTable.query_parameters).toEqual({ a: 1, d4: 1 });
+  });
+
+  it("references outside the bounded surface are left untouched", () => {
+    // `ampfoo` is not a predefined entity and has no `;`-terminated decode:
+    // the name stays literal; a bare `&...` without `;` is untouched too.
+    const source = page(
+      `<table class="t">` +
+        `<tr data-uid="1"><td><a href="/p?ampfoo;1=1&bare2=2">L</a></td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as { query_parameters: Record<string, number> };
+    expect(table.query_parameters).toEqual({ "ampfoo;1": 1, bare2: 1 });
+  });
+
+  it("text length stays computed on the raw undecoded form", () => {
+    const source = page(
+      `<table class="t"><tr data-uid="1"><td>A&amp;B</td></tr></table>`
+    );
+    const table = capture(source, entry) as {
+      columns: Array<{ text_length: { min: number; max: number } | null }>;
+    };
+    // "A&amp;B" is 7 code points raw; decoded it would be 5.
+    expect(table.columns[0]?.text_length).toEqual({ min: 7, max: 7 });
+  });
+
+  it("pins the count semantics: per-anchor presence over inspected rows, deduped per href", () => {
+    // Rows 1-3 are inspected (cap 3); row 4 is not.
+    // anchor1 carries `a` twice in one href -> counts once for that anchor.
+    // anchors 2 and 3 carry the name in two distinct anchors -> counts twice.
+    // row 4's unique name must be absent entirely.
+    const source = page(
+      `<table class="t">` +
+        `<tr data-uid="1">` +
+        `<td><a href="/p?a=1&a=9&c=7">L</a></td>` +
+        `<td><a href="/p?a=2">L</a><a href="/q?b=3">L</a></td>` +
+        `</tr>` +
+        `<tr data-uid="2"><td><a href="/p?d4=4">L</a></td></tr>` +
+        `<tr data-uid="3"><td><a href="/x">L</a></td></tr>` +
+        `<tr data-uid="4"><td><a href="/p?only_row4=5">L</a></td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as { query_parameters: Record<string, number> };
+    expect(table.query_parameters).toEqual({ a: 2, b: 1, c: 1, d4: 1 });
+  });
+
+  it("pins the wire-form percent-encoding rule (names as written, no percent-decoding)", () => {
+    const source = page(
+      `<table class="t">` +
+        `<tr data-uid="1">` +
+        `<td><a href="/p?tx_pi%5Bclient%5D=1">L</a></td>` +
+        `<td><a href="/p?x%5By%5D=2">L</a></td>` +
+        `</tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as { query_parameters: Record<string, number> };
+    expect(table.query_parameters).toEqual({ "tx_pi%5Bclient%5D": 1, "x%5By%5D": 1 });
+  });
+
+  it("row_count excludes thead rows and has_header reports the header", () => {
+    const withHeader = page(
+      `<table class="t">` +
+        `<thead><tr><th>H1</th><th>H2</th><th>H3</th></tr></thead>` +
+        `<tr data-uid="1"><td>1</td><td>2</td></tr>` +
+        `<tr data-uid="2"><td>3</td><td>4</td></tr>` +
+        `<tr data-uid="3"><td>5</td><td>6</td></tr>` +
+        `</table>`
+    );
+    const headered = capture(withHeader, entry) as {
+      row_count: number;
+      has_header: boolean;
+      column_count: number;
+      uniform: boolean;
+    };
+    expect(headered.has_header).toBe(true);
+    expect(headered.row_count).toBe(3);
+    // Header rows are never profiled: column_count derives from the data
+    // rows (2 cells each), not from the 3 header cells.
+    expect(headered.column_count).toBe(2);
+    expect(headered.uniform).toBe(true);
+
+    const withoutHeader = page(
+      `<table class="t">` +
+        `<tr data-uid="1"><td>1</td><td>2</td></tr>` +
+        `<tr data-uid="2"><td>3</td><td>4</td></tr>` +
+        `</table>`
+    );
+    const headerless = capture(withoutHeader, entry) as {
+      row_count: number;
+      rows_inspected: number;
+      has_header: boolean;
+    };
+    expect(headerless.has_header).toBe(false);
+    expect(headerless.row_count).toBe(2);
+    expect(headerless.rows_inspected).toBe(2);
+  });
+
+  it("thead + 4 data rows: profiles exactly data rows 1-3, never the header", () => {
+    // Header two cells of 2 chars each; data cells of 3/4/5/99 chars.
+    // If the header were profiled the min would drop to 2; if the 4th data
+    // row slipped past the cap the max would jump to 99.
+    const source = page(
+      `<table class="t">` +
+        `<thead><tr><th>HX</th><th>HY</th></tr></thead>` +
+        `<tr data-uid="1"><td>abc</td></tr>` +
+        `<tr data-uid="2"><td>abcd</td></tr>` +
+        `<tr data-uid="3"><td>abcde</td></tr>` +
+        `<tr data-uid="4"><td>${"A".repeat(99)}</td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as {
+      row_count: number;
+      rows_inspected: number;
+      has_header: boolean;
+      column_count: number;
+      uniform: boolean;
+      columns: Array<{ text_length: { min: number; max: number } | null }>;
+    };
+    expect(table.has_header).toBe(true);
+    expect(table.row_count).toBe(4);
+    expect(table.rows_inspected).toBe(3);
+    expect(table.column_count).toBe(1);
+    expect(table.uniform).toBe(true);
+    expect(table.columns[0]?.text_length).toEqual({ min: 3, max: 5 });
+  });
+
+  it("thead + 1 data row: rows_inspected is 1, not 2", () => {
+    const source = page(
+      `<table class="t">` +
+        `<thead><tr><th>H</th></tr></thead>` +
+        `<tr data-uid="1"><td>abc</td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as {
+      rows_inspected: number;
+      row_count: number;
+      has_header: boolean;
+    };
+    expect(table.has_header).toBe(true);
+    expect(table.row_count).toBe(1);
+    expect(table.rows_inspected).toBe(1);
+  });
+
+  it("a word header over a date-shaped column still detects the shared date pattern", () => {
+    const source = page(
+      `<table class="t">` +
+        `<thead><tr><th>Hword</th></tr></thead>` +
+        `<tr data-uid="1"><td>01.02.26</td></tr>` +
+        `<tr data-uid="2"><td>15.03.27</td></tr>` +
+        `<tr data-uid="3"><td>29.12.99</td></tr>` +
+        `</table>`
+    );
+    const table = capture(source, entry) as {
+      columns: Array<{
+        text_length: { min: number; max: number } | null;
+        date_format?: { pattern: string; matches: number };
+      }>;
+    };
+    const col = table.columns[0];
+    expect(col?.date_format).toEqual({
+      pattern: "DD.MM.YY (two-digit year)",
+      matches: 3,
+    });
+    // Header ("Hword", 5 code points) is excluded: all data cells are 8.
+    expect(col?.text_length).toEqual({ min: 8, max: 8 });
+  });
 });

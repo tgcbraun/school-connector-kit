@@ -1,6 +1,7 @@
 import { lstatSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { runCli } from "../src/cli.js";
@@ -295,5 +296,185 @@ describe("capture CLI html subcommand (capture_format 2)", () => {
       readFileSync(join(dir, "out.json"), "utf8"),
     ).requests[0];
     expect(request.method).toBe("POST");
+  });
+});
+
+interface MultiRequest {
+  url_template: string;
+  status: number;
+  tables: Array<{ row_count: number }>;
+}
+
+/** Index access that fails loudly instead of silently returning undefined. */
+function at<T>(list: readonly T[], index: number): T {
+  const value = list[index];
+  if (value === undefined) {
+    throw new Error(`expected an element at index ${index}`);
+  }
+  return value;
+}
+
+describe("capture CLI html subcommand: repeatable --input (multi-request captures)", () => {
+  const CLASSLESS_TABLE_ALLOWLIST = {
+    version: "multi-page-2025-06-15",
+    selectors: [{ kind: "table", classes: [] }],
+  };
+
+  const ONE_ROW_PAGE = `<!DOCTYPE html>
+<html><head><title>PAGE_ONE_TITLE</title></head><body>
+<table><tr><td>ONE_ROW_CELL</td></tr></table>
+</body></html>
+`;
+
+  const THREE_ROW_PAGE = `<!DOCTYPE html>
+<html><head><title>PAGE_TWO_TITLE</title></head><body>
+<table><tr><td>CELL_NUMBER_ONE</td></tr><tr><td>CELL_NUMBER_TWO</td></tr><tr><td>CELL_NUMBER_THREE</td></tr></table>
+</body></html>
+`;
+
+  function multiArgs(inputs: readonly string[], allowlistPath: string): string[] {
+    const args: string[] = ["html"];
+    for (const input of inputs) {
+      args.push("--input", input);
+    }
+    args.push(
+      "--allowlist",
+      allowlistPath,
+      "--platform",
+      "kikom",
+      "--captured-at",
+      "2025-06-15T08:30:00Z",
+      "--method",
+      "GET",
+      "--url-template",
+      "/api/v1/list/{token}",
+      "--status",
+      "200",
+      "--output",
+      join(dir, "out.json"),
+    );
+    return args;
+  }
+
+  it("captures every --input in command-line order as one request per input", () => {
+    const pageA = write("page-a.html", ONE_ROW_PAGE);
+    const pageB = write("page-b.html", THREE_ROW_PAGE);
+    const allowlist = write("allowlist.json", JSON.stringify(CLASSLESS_TABLE_ALLOWLIST));
+
+    const run = (first: string, second: string): MultiRequest[] => {
+      rmSync(join(dir, "out.json"), { force: true });
+      const result = runCli(multiArgs([first, second], allowlist));
+      expect(result.code).toBe(0);
+      const parsed = JSON.parse(
+        readFileSync(join(dir, "out.json"), "utf8"),
+      ) as {
+        capture_format: number;
+        allowlist_version: string;
+        requests: MultiRequest[];
+      };
+      expect(parsed.capture_format).toBe(2);
+      expect(parsed.allowlist_version).toBe("multi-page-2025-06-15");
+      expect(parsed.requests).toHaveLength(2);
+      return parsed.requests;
+    };
+
+    const ab = run(pageA, pageB);
+    expect(at(at(ab, 0).tables, 0).row_count).toBe(1);
+    expect(at(at(ab, 1).tables, 0).row_count).toBe(3);
+    expect(at(ab, 0).url_template).toBe("/api/v1/list/{token}");
+    expect(at(ab, 1).url_template).toBe("/api/v1/list/{token}");
+
+    const ba = run(pageB, pageA);
+    expect(at(at(ba, 0).tables, 0).row_count).toBe(3);
+    expect(at(at(ba, 1).tables, 0).row_count).toBe(1);
+  });
+
+  it("fails the whole run when one of several inputs lacks an allowlisted selector", () => {
+    const withPager = write(
+      "page-pager.html",
+      `<!DOCTYPE html><html><head><title>WITH_PAGER_TITLE</title></head><body>` +
+        `<div class="c-pager"><ul></ul></div>` +
+        `<span>WITH_PAGER_CELL_CANARY_M1</span>` +
+        `</body></html>`,
+    );
+    const withoutPager = write(
+      "page-plain.html",
+      `<!DOCTYPE html><html><head><title>PLAIN_PAGE_TITLE</title></head><body>` +
+        `<span>WITHOUT_PAGER_CELL_CANARY_N2</span>` +
+        `</body></html>`,
+    );
+    const allowlist = write(
+      "allowlist.json",
+      JSON.stringify({
+        version: "multi-page-2025-06-15",
+        selectors: [{ kind: "pagination", classes: ["c-pager"] }],
+      }),
+    );
+    const out = join(dir, "out.json");
+    const args = [
+      "html",
+      "--input",
+      withPager,
+      "--input",
+      withoutPager,
+      "--allowlist",
+      allowlist,
+      "--platform",
+      "kikom",
+      "--captured-at",
+      "2025-06-15T08:30:00Z",
+      "--method",
+      "GET",
+      "--url-template",
+      "/api/v1/list/{token}",
+      "--status",
+      "200",
+      "--output",
+      out,
+    ];
+
+    const result = runCli(args);
+    expect(result.code).toBe(1);
+    expect(result.message).toContain("resolves to zero elements");
+    expect(result.message).not.toContain("WITH_PAGER_CELL_CANARY_M1");
+    expect(result.message).not.toContain("WITHOUT_PAGER_CELL_CANARY_N2");
+
+    let outputExists = true;
+    try {
+      readFileSync(out, "utf8");
+    } catch {
+      outputExists = false;
+    }
+    expect(outputExists).toBe(false);
+  });
+
+  it("keeps single --input output byte-identical to the examples golden", () => {
+    const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+    const examplesDir = join(resolve(packageDir, "../.."), "examples");
+    const args = [
+      "html",
+      "--input",
+      join(examplesDir, "synthetic-html-page.html"),
+      "--allowlist",
+      join(examplesDir, "synthetic-html-allowlist.json"),
+      "--platform",
+      "kikom",
+      "--captured-at",
+      "2025-06-15T08:30:00Z",
+      "--method",
+      "GET",
+      "--url-template",
+      "/api/v1/schedule/{term}",
+      "--status",
+      "200",
+      "--output",
+      join(dir, "single-golden.json"),
+    ];
+
+    const result = runCli(args);
+    expect(result.code).toBe(0);
+    expect(readFileSync(join(dir, "single-golden.json"), "utf8")).toBe(
+      readFileSync(join(examplesDir, "expected-html-capture.json"), "utf8"),
+    );
   });
 });
