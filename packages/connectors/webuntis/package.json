@@ -1,0 +1,18 @@
+{
+  "name": "@school-connector-kit/connector-webuntis",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "description": "WebUntis connector for the school-connector-kit normalized contract (schema 0.1): the `assignment` capability over WebUntis homeworks.",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.buildtime.json"
+  },
+  "dependencies": {
+    "@school-connector-kit/core": "workspace:*"
+  }
+}
