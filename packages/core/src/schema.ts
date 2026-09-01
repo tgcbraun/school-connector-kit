@@ -67,8 +67,14 @@ export const ProvenanceEnvelope = z.object({
    * fixtures do not exhibit that case.
    */
   occurrence: z.int().nonnegative().optional(),
-  /** Verbatim capture envelope facts (typed, not value-pinned). */
-  allowlist_version: z.string(),
+  /**
+   * Verbatim capture envelope facts (typed, not value-pinned).
+   * `captured_at` remains required — it is supplied by the record's
+   * producer. `allowlist_version` is optional: it describes the redaction
+   * that produced a fixture, and a connector reading live data has none.
+   * Both remain typed; neither is value-pinned.
+   */
+  allowlist_version: z.string().optional(),
   captured_at: z.iso.datetime(),
   request: z.object({
     method: z.literal("GET"),

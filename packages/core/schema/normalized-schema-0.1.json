@@ -100,7 +100,6 @@
             "source_platform",
             "source_instance",
             "source_record_id",
-            "allowlist_version",
             "captured_at",
             "request"
           ],
@@ -262,7 +261,6 @@
             "source_platform",
             "source_instance",
             "source_record_id",
-            "allowlist_version",
             "captured_at",
             "request"
           ],
@@ -422,7 +420,6 @@
             "source_platform",
             "source_instance",
             "source_record_id",
-            "allowlist_version",
             "captured_at",
             "request"
           ],
@@ -542,7 +539,6 @@
                             "source_platform",
                             "source_instance",
                             "source_record_id",
-                            "allowlist_version",
                             "captured_at",
                             "request"
                           ],
@@ -700,7 +696,6 @@
                 "source_platform",
                 "source_instance",
                 "source_record_id",
-                "allowlist_version",
                 "captured_at",
                 "request"
               ],
@@ -813,7 +808,6 @@
                 "source_platform",
                 "source_instance",
                 "source_record_id",
-                "allowlist_version",
                 "captured_at",
                 "request"
               ],
@@ -974,7 +968,6 @@
                 "source_platform",
                 "source_instance",
                 "source_record_id",
-                "allowlist_version",
                 "captured_at",
                 "request"
               ],
@@ -1133,7 +1126,6 @@
                 "source_platform",
                 "source_instance",
                 "source_record_id",
-                "allowlist_version",
                 "captured_at",
                 "request"
               ],
@@ -1223,7 +1215,6 @@
                 "source_platform",
                 "source_instance",
                 "source_record_id",
-                "allowlist_version",
                 "captured_at",
                 "request"
               ],
@@ -1310,7 +1301,6 @@
         "source_platform",
         "source_instance",
         "source_record_id",
-        "allowlist_version",
         "captured_at",
         "request"
       ],
@@ -1391,7 +1381,6 @@
             "source_platform",
             "source_instance",
             "source_record_id",
-            "allowlist_version",
             "captured_at",
             "request"
           ],
@@ -1510,7 +1499,6 @@
                         "source_platform",
                         "source_instance",
                         "source_record_id",
-                        "allowlist_version",
                         "captured_at",
                         "request"
                       ],
@@ -1668,7 +1656,6 @@
             "source_platform",
             "source_instance",
             "source_record_id",
-            "allowlist_version",
             "captured_at",
             "request"
           ],
