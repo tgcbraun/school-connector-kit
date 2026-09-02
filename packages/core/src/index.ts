@@ -9,6 +9,7 @@
  * rule by being unreachable, not by being named (ADR-003, decision 9).
  */
 export * from "./schema.js";
+export * from "./connector/config.js";
 export * from "./connector/connector.js";
 export * from "./connector/errors.js";
 export * from "./connector/runtime.js";

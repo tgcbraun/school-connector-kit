@@ -18,6 +18,7 @@ import { assertNoCookieHeaders, ConnectorError } from "@school-connector-kit/cor
 import type {
   Assignment,
   Connector,
+  ConnectorConfig,
   ConnectorCredentials,
   ConnectorRuntime,
   FetchRequest,
@@ -25,14 +26,19 @@ import type {
   HttpResponse,
 } from "@school-connector-kit/core";
 
-/** Per-connector configuration. None of these values are logged. */
-export interface WebUntisConfig {
+/**
+ * Per-connector configuration (ADR-005). None of these values are logged,
+ * and none is interpolated into a `ConnectorError` message.
+ *
+ * `sourceInstance` is inherited from `ConnectorConfig` and is deliberately
+ * distinct from `school`: the school selector addresses the platform, the
+ * source instance identifies the tenant in the normalized stream.
+ */
+export interface WebUntisConfig extends ConnectorConfig {
   /** Base origin of the WebUntis instance (no trailing slash). */
   readonly baseUrl: string;
   /** The WebUntis school selector carried in the authenticate URL. */
   readonly school: string;
-  /** Tenant identity recorded in every provenance envelope. */
-  readonly sourceInstance: string;
 }
 
 /**
