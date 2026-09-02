@@ -3,6 +3,30 @@
 Two reviewed structural captures of the Kikom platform and the format-2
 allowlists that produced them.
 
+## Facts
+
+- **Platform:** Kikom
+- **Pages:** two structurally distinct tables — Informações and Termine
+- **`capture_format`:** 2 (HTML structural capture, ADR-002)
+- **Allowlists:** one per capture, committed beside it and still matching
+  it. A single allowlist version does not apply to this fixture; see
+  "Why this layout is two pairs" below.
+
+## Files
+
+```
+capture-informationen.json    # structure-only redaction of the Informações page
+allowlist-informationen.json  # the exact allowlist that produced it
+capture-termine.json          # structure-only redaction of the Termine page
+allowlist-termine.json        # the exact allowlist that produced it
+README.md                     # this file
+```
+
+Both capture files keep element structure, JSON types, string lengths,
+array and row counts, and sampled column profiles only. They contain **no
+real values otherwise**: no message or event text, no names, no ID values,
+no school name, no tenant identity.
+
 ## Why this layout is two pairs
 
 The other fixtures in this directory carry a single
@@ -54,6 +78,11 @@ one review unit — that is the honest shape.
 
 ## Provenance
 
-Reviewed on 2026-08-31 against Kikom pages captured 2026-08-30; privacy
-review passed. Reproducible from the raw pages via
-`tools/capture` (`html` path) with the allowlists in this directory.
+- Reviewed by a human as part of the school-connector-kit privacy review
+  process on 2026-08-31, against Kikom pages captured 2026-08-30; the
+  review passed and the checklist in `fixtures/README.md` applies.
+- Reproducible from the raw pages via `tools/capture` (`html` path) with
+  the allowlists in this directory.
+- `private-fixtures/kikom/` holds the private originals and the private
+  fetch/analysis tooling; this directory stands alone and needs no access
+  to them.
