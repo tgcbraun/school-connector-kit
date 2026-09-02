@@ -61,3 +61,26 @@ configuration-cookie seam is needed, and none is added.
 The shim has been sending a cookie the endpoint does not need. Not a
 defect — it mirrors the established private connector — but the
 justification for it no longer holds. Recorded, not acted on.
+
+## Amendment — a premise corrected by the first live run
+
+The Question section above states that `schoolname` is caller-supplied
+configuration that a response-driven cookie jar would never hold. **On the
+instance tested, that premise is wrong.**
+
+The first live connector run used a Transport whose cookie jar is populated
+only from response `Set-Cookie` headers. It never sent `schoolname`. The jar
+nevertheless ended the authentication step holding three cookies:
+`JSESSIONID`, `schoolname`, and `Tenant-Id`. The server sets all three. The
+third does not appear anywhere else in this repository's evidence.
+
+**The conclusion is unchanged and is strengthened, not weakened.** Run B of
+the probe established that the homework endpoint does not require
+`schoolname`. The live run additionally establishes that a Transport owning
+only response-set cookies acquires it anyway on this instance. Both routes
+lead to the same place: ADR-003 decision 3 needs no configuration-cookie
+seam, and none is added.
+
+Scope is unchanged: one tenant, one endpoint. This does not establish that
+every WebUntis instance sets these cookies, nor that any endpoint requires
+them.
