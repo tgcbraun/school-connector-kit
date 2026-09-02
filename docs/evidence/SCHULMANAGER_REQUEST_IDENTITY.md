@@ -135,8 +135,10 @@ Decided:
 
 Not decided:
 - Which status the operator records: the envelope's HTTP status or the
-  per-result `status`. No divergence between them has been observed, because
-  no response has been captured.
+  per-result `status`. No divergence has been observed: the 2026-09-02 session
+  captured four responses and both axes read 200 in every one. Absence of
+  divergence in a four-response sample is not evidence that the two axes
+  agree.
 - What a mixed-status envelope looks like on the wire. No source read carries
   evidence of one; the private connector raises on any non-200 result, which is
   a fact about that code rather than about the wire. ADR-004 records this as an
