@@ -1,0 +1,16 @@
+{
+  "version": "schulmanager-login-v1",
+  "rules": [
+    { "path": "user.id", "mode": "type" },
+    { "path": "user.username", "mode": "type" },
+    { "path": "user.localUsername", "mode": "type" },
+    { "path": "user.ldapUsername", "mode": "type" },
+    { "path": "user.logodidactUsername", "mode": "type" },
+    { "path": "user.roles", "mode": "type" },
+    { "path": "user.associatedStudent", "mode": "type" },
+    { "path": "user.associatedParents[].id", "mode": "type" },
+    { "path": "user.associatedParents[].sex", "mode": "type" },
+    { "path": "user.associatedParents[].student.id", "mode": "type" },
+    { "path": "user.associatedParents[].student.sex", "mode": "type" }
+  ]
+}

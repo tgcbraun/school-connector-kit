@@ -1,0 +1,62 @@
+{
+  "capture_format": 1,
+  "platform": "schulmanager",
+  "allowlist_version": "schulmanager-letter-mailing-setting-v1",
+  "captured_at": "2026-09-02T10:54:00Z",
+  "requests": [
+    {
+      "method": "POST",
+      "url_template": "/api/calls",
+      "status": 200,
+      "logical_call": "letter-mailing-setting",
+      "shape": {
+        "results": [
+          {
+            "data": {
+              "__t": "bool"
+            },
+            "status": {
+              "__t": "int"
+            }
+          }
+        ],
+        "systemStatusMessages": [
+          {
+            "id": {
+              "__t": "int"
+            },
+            "level": {
+              "__t": "string",
+              "__len": 7
+            },
+            "platforms": [],
+            "relevantModules": [],
+            "roles": [
+              {
+                "__t": "string",
+                "__len": 4
+              }
+            ],
+            "visibilities": [
+              {
+                "__t": "string",
+                "__len": 10
+              }
+            ]
+          }
+        ]
+      },
+      "dropped_paths": [
+        "systemStatusMessages[].text"
+      ],
+      "array_lengths": {
+        "results": 1,
+        "systemStatusMessages": 1,
+        "systemStatusMessages[].platforms": 0,
+        "systemStatusMessages[].relevantModules": 0,
+        "systemStatusMessages[].roles": 1,
+        "systemStatusMessages[].visibilities": 1
+      }
+    }
+  ]
+}

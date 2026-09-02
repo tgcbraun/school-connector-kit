@@ -62,12 +62,15 @@ request per letter (`poqa findByPk`, scoped to a single model). ADR-003's
 fetcher returns `Promise<readonly unknown[]>` from a single call with no notion
 of a second round-trip.
 
-**6. Token rotation is per-call, not per-session.** The rotation header is
-checked on every `/api/calls` response and the session dies if the new token is
-not adopted. The only two writes to the `Authorization` header are in login and
-in the calls wrapper — **nothing outside the calls wrapper touches auth after
-login**. This closes the second of the two outstanding reads on the private
-connector.
+**6. The client checks for token rotation on every `/api/calls` response.**
+The rotation header is read on each response and adopted when present. Whether
+the server sends it per-call, occasionally, or not at all is not established by
+source reading; the 2026-09-02 capture session did not observe it at all. The
+claim that the session dies if a new token is not adopted is carried from the
+private connector's comment and is untested. The only two writes to the
+`Authorization` header are in login and in the calls wrapper — **nothing
+outside the calls wrapper touches auth after login**. That much the source
+settles; the server's rotation behaviour remains open.
 
 **7. HTML inside a JSON field.** Letter detail responses carry HTML in a body
 field. Format 1 tooling captures it as a string with a length token, which says
@@ -155,3 +158,54 @@ discriminator field. Round 1 also prepared a privacy argument for promoting
 withdrawn as unnecessary, not overruled.
 
 The method note: a write path cannot be inferred from the type it constructs.
+
+## Capture evidence (2026-09-02 session)
+
+Round 1 and round 2 were derived from reading the private connector source
+and the capture tooling; round 2's status line records that "No
+Schulmanager capture has been taken." The 2026-09-02 session — four
+logical calls, one capture per logical call per the decided interpretation
+— is now published as `fixtures/schulmanager/variant-001/` and is the
+first capture. What it establishes:
+
+**13. `/api/salt` is not part of the working auth sequence on this
+tenant.** It returns HTTP 404 with an HTML body on this tenant. The private
+connector wraps the call in a try and swallows the failure, so this went
+unnoticed in the transport facts above, which list `POST /api/salt` as the
+first auth step. Login succeeds with `hash: null` on the plaintext path.
+The documented auth sequence should be read as: salt is not part of the
+working sequence on this tenant.
+
+**14. The letter detail body field is named `text`.**
+`results[].data.text` appears among the dropped paths of the letter-detail
+capture. A three-way fallback of `content`, then `text`, then `body` exists
+in the private connector; the first and third branches are unevidenced.
+
+**15. The letter list response carries a per-student axis.**
+`studentStatuses[].studentId` and `studentStatuses[].readTimestamp`.
+Letters are institution-scoped, but the list response does carry child
+identifiers and read state.
+
+**16. `results[].data` is untyped across logical calls.** `get-letters`
+returns an array, `letter-detail` an object, `letter-mailing-setting` a bare
+boolean — under the same envelope. The per-result `status` axis that
+ADR-004 decision 6 left open is now observed: both axes read 200 in these
+captures.
+
+**17. The template grammar required no relaxation.** The URL template
+grammar in `tools/capture` accepted `/api/salt`, `/api/login` and
+`/api/calls` with no relaxation. Schulmanager is the first platform in the
+corpus to require none.
+
+## Open questions arising from the capture
+
+- **Token rotation — unobserved, not tested.** `X-New-Bearer-Token` was
+  absent from all four responses in the session, including the three
+  `/api/calls` responses. Rotation is therefore unobserved — not per-call
+  and not per-session. A capture cannot evidence a header that was not
+  sent. This is an open question, not a finding: the session does not
+  claim the rotation mechanism was tested. Finding 6 remains a reading of
+  the private connector's source (the connector checks the header on every
+  `/api/calls` response and is built around adopting a new token); what
+  the capture adds is that the header was not sent on any response of this
+  session, so no capture yet shows the platform sending it.

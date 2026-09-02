@@ -1,0 +1,149 @@
+{
+  "capture_format": 1,
+  "platform": "schulmanager",
+  "allowlist_version": "schulmanager-get-letters-v1",
+  "captured_at": "2026-09-02T10:54:00Z",
+  "requests": [
+    {
+      "method": "POST",
+      "url_template": "/api/calls",
+      "status": 200,
+      "logical_call": "get-letters",
+      "shape": {
+        "results": [
+          {
+            "data": [
+              {
+                "createdAt": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "sentDate": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "studentStatuses": [
+                  {
+                    "id": {
+                      "__t": "int"
+                    },
+                    "readTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    },
+                    "sentTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    }
+                  }
+                ]
+              },
+              {
+                "createdAt": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "sentDate": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "studentStatuses": [
+                  {
+                    "id": {
+                      "__t": "int"
+                    },
+                    "readTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    },
+                    "sentTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    }
+                  }
+                ]
+              },
+              {
+                "createdAt": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "id": {
+                  "__t": "int"
+                },
+                "sentDate": {
+                  "__t": "string",
+                  "__len": 24
+                },
+                "studentStatuses": [
+                  {
+                    "id": {
+                      "__t": "int"
+                    },
+                    "readTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    },
+                    "sentTimestamp": {
+                      "__t": "string",
+                      "__len": 24
+                    }
+                  }
+                ]
+              }
+            ],
+            "status": {
+              "__t": "int"
+            }
+          }
+        ],
+        "systemStatusMessages": [
+          {
+            "id": {
+              "__t": "int"
+            },
+            "level": {
+              "__t": "string",
+              "__len": 7
+            },
+            "platforms": [],
+            "relevantModules": [],
+            "roles": [
+              {
+                "__t": "string",
+                "__len": 4
+              }
+            ],
+            "visibilities": [
+              {
+                "__t": "string",
+                "__len": 10
+              }
+            ]
+          }
+        ]
+      },
+      "dropped_paths": [
+        "results[].data[].studentStatuses[].studentId",
+        "results[].data[].title",
+        "systemStatusMessages[].text"
+      ],
+      "array_lengths": {
+        "results": 1,
+        "results[].data": 10,
+        "results[].data[].studentStatuses": 1,
+        "systemStatusMessages": 1,
+        "systemStatusMessages[].platforms": 0,
+        "systemStatusMessages[].relevantModules": 0,
+        "systemStatusMessages[].roles": 1,
+        "systemStatusMessages[].visibilities": 1
+      }
+    }
+  ]
+}

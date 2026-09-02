@@ -1,0 +1,72 @@
+{
+  "capture_format": 1,
+  "platform": "schulmanager",
+  "allowlist_version": "schulmanager-login-v1",
+  "captured_at": "2026-09-02T10:54:00Z",
+  "requests": [
+    {
+      "method": "POST",
+      "url_template": "/api/login",
+      "status": 200,
+      "shape": {
+        "user": {
+          "associatedParents": [
+            {
+              "id": {
+                "__t": "int"
+              },
+              "sex": {
+                "__t": "null"
+              },
+              "student": {
+                "id": {
+                  "__t": "int"
+                },
+                "sex": {
+                  "__t": "null"
+                }
+              }
+            }
+          ],
+          "associatedStudent": {
+            "__t": "null"
+          },
+          "id": {
+            "__t": "int"
+          },
+          "ldapUsername": {
+            "__t": "null"
+          },
+          "localUsername": {
+            "__t": "null"
+          },
+          "logodidactUsername": {
+            "__t": "null"
+          },
+          "roles": {
+            "__t": "null"
+          },
+          "username": {
+            "__t": "null"
+          }
+        }
+      },
+      "dropped_paths": [
+        "jwt",
+        "user.associatedParents[].firstname",
+        "user.associatedParents[].lastname",
+        "user.associatedParents[].student.classId",
+        "user.associatedParents[].student.firstname",
+        "user.associatedParents[].student.lastname",
+        "user.associatedTeachers",
+        "user.email",
+        "user.firstname",
+        "user.institutionId",
+        "user.lastname"
+      ],
+      "array_lengths": {
+        "user.associatedParents": 1
+      }
+    }
+  ]
+}

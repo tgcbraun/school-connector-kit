@@ -1,0 +1,21 @@
+{
+  "version": "schulmanager-letter-detail-v1",
+  "rules": [
+    { "path": "results[].status", "mode": "type" },
+    { "path": "results[].data.id", "mode": "type" },
+    { "path": "results[].data.createdAt", "mode": "type" },
+    { "path": "results[].data.sentDate", "mode": "type" },
+    { "path": "results[].data.updatedAt", "mode": "type" },
+    { "path": "results[].data.isVisibleForAlldaySupervisors", "mode": "type" },
+    { "path": "results[].data.attachments[].id", "mode": "type" },
+    { "path": "results[].data.attachments[].letterId", "mode": "type" },
+    { "path": "results[].data.attachments[].contentType", "mode": "type" },
+    { "path": "results[].data.attachments[].inline", "mode": "type" },
+    { "path": "systemStatusMessages[].id", "mode": "type" },
+    { "path": "systemStatusMessages[].level", "mode": "type" },
+    { "path": "systemStatusMessages[].platforms[]", "mode": "type" },
+    { "path": "systemStatusMessages[].relevantModules[]", "mode": "type" },
+    { "path": "systemStatusMessages[].roles[]", "mode": "type" },
+    { "path": "systemStatusMessages[].visibilities[]", "mode": "type" }
+  ]
+}

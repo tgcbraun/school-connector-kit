@@ -1,0 +1,103 @@
+{
+  "capture_format": 1,
+  "platform": "schulmanager",
+  "allowlist_version": "schulmanager-letter-detail-v1",
+  "captured_at": "2026-09-02T10:54:00Z",
+  "requests": [
+    {
+      "method": "POST",
+      "url_template": "/api/calls",
+      "status": 200,
+      "logical_call": "letter-detail",
+      "shape": {
+        "results": [
+          {
+            "data": {
+              "attachments": [
+                {
+                  "contentType": {
+                    "__t": "string",
+                    "__len": 15
+                  },
+                  "id": {
+                    "__t": "int"
+                  },
+                  "inline": {
+                    "__t": "bool"
+                  },
+                  "letterId": {
+                    "__t": "int"
+                  }
+                }
+              ],
+              "createdAt": {
+                "__t": "string",
+                "__len": 24
+              },
+              "id": {
+                "__t": "int"
+              },
+              "isVisibleForAlldaySupervisors": {
+                "__t": "bool"
+              },
+              "sentDate": {
+                "__t": "string",
+                "__len": 24
+              },
+              "updatedAt": {
+                "__t": "string",
+                "__len": 24
+              }
+            },
+            "status": {
+              "__t": "int"
+            }
+          }
+        ],
+        "systemStatusMessages": [
+          {
+            "id": {
+              "__t": "int"
+            },
+            "level": {
+              "__t": "string",
+              "__len": 7
+            },
+            "platforms": [],
+            "relevantModules": [],
+            "roles": [
+              {
+                "__t": "string",
+                "__len": 4
+              }
+            ],
+            "visibilities": [
+              {
+                "__t": "string",
+                "__len": 10
+              }
+            ]
+          }
+        ]
+      },
+      "dropped_paths": [
+        "results[].data.answerDeadline",
+        "results[].data.attachments[].file",
+        "results[].data.attachments[].filename",
+        "results[].data.options",
+        "results[].data.text",
+        "results[].data.title",
+        "systemStatusMessages[].text"
+      ],
+      "array_lengths": {
+        "results": 1,
+        "results[].data.attachments": 1,
+        "systemStatusMessages": 1,
+        "systemStatusMessages[].platforms": 0,
+        "systemStatusMessages[].relevantModules": 0,
+        "systemStatusMessages[].roles": 1,
+        "systemStatusMessages[].visibilities": 1
+      }
+    }
+  ]
+}
