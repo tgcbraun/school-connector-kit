@@ -9,7 +9,7 @@ Vendor-neutral normalized schema shared by connectors and consumers.
 
 | Path | Role |
 |---|---|
-| `src/schema.ts` | The 0.1 schema: 6 concepts, 4 date forms, identity model (Zod v4) |
+| `src/schema.ts` | The 0.1 schema: 6 concepts, 5 date forms, identity model (Zod v4) |
 | `src/document.ts` | Pure builder for the JSON Schema document (shared by writer and pinning test) |
 | `src/generate-json-schema.ts` | The only writer of `schema/normalized-schema-0.1.json` |
 | `test/schema.test.ts` | Hand-written instances whose SHAPE is derived from the committed fixture structure (the fixtures carry no values — see "What the tests claim, and do not claim"), plus evidence-boundary pins |
@@ -35,7 +35,7 @@ capture — which contains no assessment-shaped array — does not support it
 (listing a concept a fixture cannot populate is the failure this project
 already avoided with Absence; a thin, flagged variant is not an exception).
 
-## Date model — four distinct forms, no collapse, no conversions
+## Date model — five distinct forms, no collapse, no conversions
 
 | Form | Evidenced by | Shape facts |
 |---|---|---|
@@ -43,14 +43,18 @@ already avoided with Absence; a thin, flagged variant is not an exception).
 | WeekdaySlot | dieschulapp | Weekday int (0–4 observed; encoding not pinned — G5) + slot number + time-of-day strings; the week anchor is recorded as **out-of-band** (request parameter only, never in the response) |
 | PartialDay | kikom termine | Day + month, year absent on the page → `resolved_year` + `year_stated_by_platform: false` + `inference_anchor` (+ optional `sequence_position`; per-row values redacted — G4) |
 | DayOnly | kikom informationen | Full calendar day, NO time component; `year_provenance` records the 2-digit-year century inference |
+| `PlatformInstant` | schulmanager letter dates | The platform supplies a 24-character instant string; the form holds it as emitted, derives no civil day, and assumes no timezone. Capture format 1 records only type and length, so the exact serialization is not established by the corpus and no future capture can establish it; the validator accepts a trailing-Z form and an extended numeric offset but rejects a basic offset (G22 covers the residual risk) |
 
 Rules pinned by tests:
 
-- **No midnight-UTC conversion:** nothing carries a timestamp/instant/epoch
-  field; the day-carrying forms are closed objects
-  (`additionalProperties: false`). Storing a Berlin local midnight as a UTC
-  midnight would land at 22:00 UTC on the PREVIOUS day — the model forbids
-  the shape that invites that bug.
+- **No midnight-UTC conversion:** no date form converts a platform value
+  into an instant, and no form derives a civil day from an instant; the
+  day-carrying forms remain closed objects
+  (`additionalProperties: false`). `PlatformInstant` carries an instant only
+  because the platform supplies one, and it derives no day from it — the same
+  rule, not an exception. Storing a Berlin local midnight as a UTC midnight
+  would land at 22:00 UTC on the PREVIOUS day — the model forbids the shape
+  that invites that bug.
 - **Undetermined encoding is not encoded:** `PlatformDateInt` is
   `{kind, value}` exactly (shape test) — no component fields a fixture does
   not back, and no unit implied by the name (gap G6).
@@ -58,7 +62,9 @@ Rules pinned by tests:
   `year_stated_by_platform: false` (year absent), while `DayOnly`
   pins a `year_provenance` block with `stated_digits: 2` (year stated
   partially, century inferred). They do not share a flag, and a
-  stated-4-digit-year case is not modeled in 0.1 (no fixture backs it).
+  stated-4-digit-year case is not modeled in 0.1 (no fixture backs it) — an
+  explicit ADR-006 non-decision: `DayOnly.year_provenance` pins Kikom
+  Informationen's exact shape, and generalising it is recorded as G23.
 
 ## Identity model
 
@@ -90,6 +96,15 @@ all captures (G3).
 - **G13 `packages/core/src/` mixes shippable and build-time modules; they are separated only by reachability from the entry point, not by directory — now closed** — shippable and build-time code now compile under separate tsconfigs: `tsconfig.json` (the shippable surface — `src/index.ts`, `src/schema.ts`, `src/connector/**`) and `tsconfig.buildtime.json` (the build-time modules `src/document.ts`, `src/generate-json-schema.ts` and every test in `test/`); the `typecheck` script runs both legs so no file escapes typechecking, and the separation is by include pattern, with no file moved. ADR-003's entry-closure rule and its scan are unchanged and still guard the shippable surface at runtime, now alongside the compiler.
 - **G14 packages/core sets no `"lib"`; the target default includes DOM typings — now closed** — packages/core now sets `"lib": ["ES2022"]` explicitly in its own `tsconfig.json`, so DOM typings are no longer pulled in by the target default, and DOM globals no longer typecheck under the package's tsconfig chain. The change produced zero typecheck diagnostics because the package uses no DOM symbol (ADR-003).
 - **G15 packages/core/tsconfig.json sets `"types": ["node"]` — now closed** — `tsconfig.json` no longer sets `"types"` at all, so Node globals (process, Buffer, console) no longer typecheck inside the shippable surface: the compiler, not only the entry-closure scan, rejects them there (a `process` reference added to a shippable file fails the leg-1 typecheck). Dropping the array was previously blocked by `generate-json-schema.ts` using `console` and `document.ts` importing `node:module` in the same compilation; that collision is resolved by the G13 separation, since those modules (and every test, including the scan, which needs Node types) compile under `tsconfig.buildtime.json` — the only config in the chain that sets `"types": ["node"]`, which the emit config `tsconfig.build.json` inherits.
+- **G16 ISO-8601 instant date form** — RESOLVED by ADR-006: Schulmanager letters carry 24-character instants that none of the four original forms accepted, and `PlatformInstant` is the answer.
+- **G17 readTimestamp null form** — no unread letter appeared in the Schulmanager sample, so the null form of `readTimestamp` is unevidenced.
+- **G18 answerDeadline / options** — both null in the Schulmanager letter-detail capture, so their shapes are unobserved and both are denied by the allowlist.
+- **G19 attachments[].file** — a 176-character string in the Schulmanager capture; whether it is a path or a key, and its purpose, is unresolved.
+- **G20 X-New-Bearer-Token rotation** — the header was absent from all four responses in the Schulmanager capture session; rotation behaviour is unobserved rather than established as per-call or per-session, and the client checking for it on every response is evidence about the client, not the server.
+- **G21 Schulmanager N+1 detail fetch** — the letters path fetches a list then issues one detail request per letter, and ADR-003's fetcher signature has no notion of a second round-trip.
+- **G22 PlatformInstant basic-offset serialization** — the validator accepts a trailing-Z instant and an extended numeric offset (+02:00) but rejects a basic offset (+0200); both are 24 characters at second precision, so the corpus cannot discriminate, and if a live Schulmanager connector rejects real rows the platform emits a basic offset and the form widens then, with evidence (ADR-006).
+- **G23 DayOnly.year_provenance pinned to one platform's shape** — its three required literals pin Kikom Informationen exactly, so a platform stating a four-digit year cannot use DayOnly; nothing in the corpus demands it yet (ADR-006).
+- **G24 ProvenanceEnvelope request.status pinned to 200** — every committed capture is 200, and absence of a non-200 is not evidence that the axis is closed; ADR-004 left the per-result status axis open, and ADR-006 declined to widen the HTTP one.
 
 G0–G8 keep these identifiers; earlier cross-references remain valid.
 
@@ -124,7 +139,7 @@ Stated as a finding, precisely:
   placeholder shape values where the fixtures type a field with redacted
   content, and the verbatim envelope metadata committed in the fixture
   files. They pin that the schema accepts that shape and rejects the
-  evidence boundaries (the README gap register, G0–G8).
+  evidence boundaries (the README gap register, G0–G24).
 - **What the tests do NOT do:** the committed fixtures are structure-only
   and **carry no values**, so no instance can be constructed from them.
   Nothing in this suite is a schema-conformance validation of 0.1 against
@@ -135,4 +150,4 @@ Stated as a finding, precisely:
   value-free fixture cannot serve as a schema conformance test. A future
   connector implementation — running 0.1 against live platform data — is
   what will validate it. This is a statement of where the evidence ends,
-  not a deficiency; the gap register (G0–G8) records the rest.
+  not a deficiency; the gap register (G0–G24) records the rest.
