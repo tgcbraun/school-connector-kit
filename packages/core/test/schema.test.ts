@@ -42,6 +42,7 @@ import {
   Message,
   NormalizedMessage,
   PartialDay,
+  PlatformInstant,
   ProvenanceEnvelope,
   StudentReference,
   TimetableEntry,
@@ -352,6 +353,109 @@ describe("date model — four distinct forms, no collapse, no midnight-UTC", () 
     // fields above, which must not exist at all.
     expect("start_time" in WeekdaySlot.shape).toBe(true);
     expect("end_time" in WeekdaySlot.shape).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("PlatformInstant — ADR-006, a platform-supplied instant held as emitted", () => {
+  // Note on strictness: the four pre-existing forms (PlatformDateInt,
+  // WeekdaySlot, PartialDay, DayOnly) are all plain z.object — non-strict,
+  // excess properties stripped — so PlatformInstant is intentionally NOT
+  // pinned for strictness either: pinning it would make the new form
+  // behave differently from the other four.
+  it("accepts a trailing-Z instant with fractional seconds", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00.000Z",
+      }).success,
+    ).toBe(true);
+  });
+  it("accepts a trailing-Z instant without fractional seconds", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00Z",
+      }).success,
+    ).toBe(true);
+  });
+  it("accepts an extended numeric offset", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00+02:00",
+      }).success,
+    ).toBe(true);
+  });
+  it("rejects a basic (no-colon) offset — the gap-register case", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00+0200",
+      }).success,
+    ).toBe(false);
+  });
+  it("rejects a naive (offsetless) datetime", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00",
+      }).success,
+    ).toBe(false);
+  });
+  it("rejects a plain calendar date (not an instant)", () => {
+    expect(
+      PlatformInstant.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02",
+      }).success,
+    ).toBe(false);
+  });
+  it("accepts a platform_instant member in DateValue, discriminated on kind", () => {
+    expect(
+      DateValue.safeParse({
+        kind: "platform_instant",
+        value: "2026-09-02T10:54:00Z",
+      }).success,
+    ).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("ProvenanceEnvelope — captured_at offset discipline and request.method", () => {
+  it("accepts a trailing-Z captured_at", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...webuntisEnvelope,
+        captured_at: "2026-09-02T10:54:00Z",
+      }).success,
+    ).toBe(true);
+  });
+  it("accepts an extended-offset captured_at", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...webuntisEnvelope,
+        captured_at: "2026-09-02T10:54:00+02:00",
+      }).success,
+    ).toBe(true);
+  });
+  it("rejects a basic (no-colon) offset captured_at", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...webuntisEnvelope,
+        captured_at: "2026-09-02T10:54:00+0200",
+      }).success,
+    ).toBe(false);
+  });
+  it("accepts request.method POST (GET is covered by the committed envelope facts above)", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...webuntisEnvelope,
+        request: { ...webuntisEnvelope.request, method: "POST" },
+      }).success,
+    ).toBe(true);
   });
 });
 

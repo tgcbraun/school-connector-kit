@@ -8,7 +8,7 @@
  * instructions. Test payload values are placeholders for shapes the fixture
  * typed (e.g. a redacted string), never real data.
  *
- * Date model — four distinct forms, deliberately NOT collapsed into a single
+ * Date model — five distinct forms, deliberately NOT collapsed into a single
  * timestamp. Collapsing a Berlin local midnight into a UTC instant lands at
  * 22:00 UTC on the PREVIOUS calendar day and shifts the day by one for
  * consumers. Nothing in this schema converts date forms into one another.
@@ -21,8 +21,8 @@ import { z } from "zod";
 
 export const SCHEMA_VERSION = "0.1";
 
-/** The three platforms with committed fixtures. */
-export const Platform = z.enum(["webuntis", "dieschulapp", "kikom"]);
+/** The four platforms with committed fixtures. */
+export const Platform = z.enum(["webuntis", "dieschulapp", "kikom", "schulmanager"]);
 export type Platform = z.infer<typeof Platform>;
 
 // ---------------------------------------------------------------------------
@@ -75,9 +75,9 @@ export const ProvenanceEnvelope = z.object({
    * Both remain typed; neither is value-pinned.
    */
   allowlist_version: z.string().optional(),
-  captured_at: z.iso.datetime(),
+  captured_at: z.iso.datetime({ offset: true }),
   request: z.object({
-    method: z.literal("GET"),
+    method: z.enum(["GET", "POST"]),
     status: z.literal(200),
     /** The request's URL template: shape only, never private values. */
     url_template: z.string(),
@@ -88,7 +88,7 @@ export const ProvenanceEnvelope = z.object({
 export type ProvenanceEnvelope = z.infer<typeof ProvenanceEnvelope>;
 
 // ---------------------------------------------------------------------------
-// Date model — four distinct forms, no collapse, no conversions
+// Date model — five distinct forms, no collapse, no conversions
 // ---------------------------------------------------------------------------
 
 /**
@@ -232,12 +232,37 @@ export const DayOnly = z.object({
 });
 export type DayOnly = z.infer<typeof DayOnly>;
 
-/** The four forms, discriminated by `kind`; no cross-conversion provided. */
+/**
+ * 5) Platform instant — an instant the platform supplies as a string.
+ *
+ * Schulmanager: letter `createdAt`, `sentDate`, `updatedAt`, `readTimestamp`
+ * and `sentTimestamp` — each a 24-character string in the committed capture.
+ * The platform supplies the instant, and this form holds the platform's
+ * string as emitted: it derives no civil day, assumes no timezone, and
+ * records nothing on top of that.
+ *
+ * The serialization is NOT established by the corpus: capture format 1
+ * records only a type token and a string length for these fields, and has
+ * no facility for recording a pattern, so it cannot be established by any
+ * future capture. The validator therefore accepts exactly as narrow a shape
+ * as the evidence warrants — the trailing-Z form and an extended numeric
+ * offset, not a basic offset — and the basic-offset risk is a gap register
+ * entry, not a narrowing.
+ */
+export const PlatformInstant = z.object({
+  kind: z.literal("platform_instant"),
+  /** Held as emitted; a consumer needing a civil day must supply the zone. */
+  value: z.iso.datetime({ offset: true }),
+});
+export type PlatformInstant = z.infer<typeof PlatformInstant>;
+
+/** The five forms, discriminated by `kind`; no cross-conversion provided. */
 export const DateValue = z.discriminatedUnion("kind", [
   PlatformDateInt,
   WeekdaySlot,
   PartialDay,
   DayOnly,
+  PlatformInstant,
 ]);
 export type DateValue = z.infer<typeof DateValue>;
 
