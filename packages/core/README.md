@@ -25,7 +25,7 @@ Vendor-neutral normalized schema shared by connectors and consumers.
 | Event | kikom variant-001 (termine) | Date is a `PartialDay`; the recurring-row case carries the platform's own occurrence index |
 | Message | kikom variant-001 (informationen); schulmanager variant-001 (letters) | Date is a union of `DayOnly` (Kikom, with its distinct 2-digit-year century-inference provenance) and `PlatformInstant` (Schulmanager letters); `link_count` is optional and pins Kikom's link presence only, never the targets (G7) |
 | StudentReference | dieschulapp variant-001 (per-student scope) | WebUntis homeworks carry no student: the absence IS its WebUntis evidence; the id shape was redacted (G2) |
-| ProvenanceEnvelope | all three platforms | Attached to every concept; identity triple + occurrence discriminator + verbatim capture envelope facts |
+| ProvenanceEnvelope | all four platforms | Attached to every concept; identity triple + occurrence discriminator + verbatim capture envelope facts |
 
 **Absence and Assessment are deliberately not concepts in 0.1.** No
 committed fixture populates either. Both are documented as known gaps (G0,
@@ -75,8 +75,11 @@ across occurrences, and the platform's own answer is the indexed parameter
 `tx_calendarize_calendar[index]`. Values travel as opaque strings (redacted
 by design); the envelope facts (allowlist version, capture timestamp,
 request method/status/url-template shape, request array index) are the
-verbatim metadata the fixtures supply. Tenant identity values are dropped in
-all captures (G3).
+verbatim metadata the fixtures supply. `ProvenanceEnvelope.request` also
+carries an optional `logical_call`, which no fixture supplies: unlike the
+request array index, which records a position inside a capture's
+`requests[]` array, it is populated by a connector reading live data.
+Tenant identity values are dropped in all captures (G3).
 
 ## Gap register (not backed by committed fixtures — reported, not invented)
 
@@ -101,7 +104,7 @@ all captures (G3).
 - **G18 answerDeadline / options** — both null in the Schulmanager letter-detail capture, so their shapes are unobserved and both are denied by the allowlist.
 - **G19 attachments[].file** — a 176-character string in the Schulmanager capture; whether it is a path or a key, and its purpose, is unresolved.
 - **G20 X-New-Bearer-Token rotation** — the header was absent from all four responses in the Schulmanager capture session; rotation behaviour is unobserved rather than established as per-call or per-session, and the client checking for it on every response is evidence about the client, not the server.
-- **G21 Schulmanager N+1 detail fetch** — the letters path fetches a list, then issues one detail request per letter, and the Schulmanager letter body (field `text`) is only in the detail response — so a Message cannot be built from the list call alone. The fetcher signature does not forbid this: `Transport.send` is a plain per-request method on a session-scoped transport held in the connector's closure, and the WebUntis connector already issues two sends in one session; what is open is not expressibility. What IS open, and unresolved: (a) the fan-out is unbounded and there is no lever to cap it — `FetchWindow` is the only request-side parameter and Schulmanager accepts no window; and (b) partial failure has no channel — the fetcher returns a bare array with no per-row error slot, so one failed detail request costs either the whole batch or a silent drop, and ADR-003's `number | boolean` log fields cannot name which row. Two provenance findings on top, which the singular envelope cannot express: an N+1 row derives from two requests while `ProvenanceEnvelope.request` can name only one, and ADR-004's `logical_call` exists in the capture model but never reached the normalized envelope — so every Schulmanager envelope reads `POST /api/calls` and provenance cannot say which logical call produced the row. This is ADR-sized, and it is not answered by the Message widening.
+- **G21 Schulmanager N+1 detail fetch** — the letters path fetches a list, then one detail request per letter (the body is only in the detail response). It is expressible under ADR-003 — the fetcher signature constrains what a fetcher returns, not how many requests it issues — and ADR-007 now answers the rest: fan-out is bounded by the connector, not by the contract, deliberately (decision 2, recorded as a decision rather than an open item); partial failure is not represented and decision 3 declines to invent a representation — the platform supplies a per-result status slot and it is observed, but no capture exhibits a failure value in it, so the first connector to meet one decides; `logical_call` now exists on the normalized envelope (decision 4), so a Schulmanager row's provenance no longer reads only `POST /api/calls`. What remains open: the singular envelope under-describes an N+1 row — `logical_call` names the call that established the row's identity, so the body's own request is named nowhere (decision 5 records the limit there).
 - **G22 PlatformInstant basic-offset serialization** — the validator accepts a trailing-Z instant and an extended numeric offset (+02:00) but rejects a basic offset (+0200); both are 24 characters at second precision, so the corpus cannot discriminate, and if a live Schulmanager connector rejects real rows the platform emits a basic offset and the form widens then, with evidence (ADR-006).
 - **G23 DayOnly.year_provenance pinned to one platform's shape** — its three required literals pin Kikom Informationen exactly, so a platform stating a four-digit year cannot use DayOnly; nothing in the corpus demands it yet (ADR-006).
 - **G24 ProvenanceEnvelope request.status pinned to 200** — every committed capture is 200, and absence of a non-200 is not evidence that the axis is closed; ADR-004 left the per-result status axis open, and ADR-006 declined to widen the HTTP one.
