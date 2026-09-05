@@ -72,7 +72,13 @@ field. ADR-004 decision 5 is the nearer precedent: the capture tooling
 refused to traverse an envelope and took one call per file instead.
 
 **Consequence:** two connectors may bound differently, and the contract
-cannot compare them. Recorded as a cost.
+cannot compare them. Recorded as a cost. The contract also supplies no
+cancellation seam: `HttpRequest` carries `method`, `url`, `headers` and
+an optional `body`, and `Transport` declares a single `send(request)`
+returning a promise, so a fetch that has fanned out cannot be
+interrupted by its host. This matters most for the mobile hosts ADR-003
+is written for, and adding cancellation later is a change to the
+contract's request type rather than to any connector.
 
 ### 3. Partial failure is not representable, and this ADR does not invent a representation
 
@@ -81,15 +87,17 @@ detail request costs either the whole batch or a silent drop, and ADR-003's
 `number | boolean` log fields cannot name which row failed. This ADR adds
 neither a per-row error slot nor a logging channel.
 
-**Reason:** no capture evidences a partial failure — every observed result
-is 200 — so specifying a representation now would be specifying against an
-imagined wire format. This is ADR-004 decision 6's reasoning applied to a
-second axis.
+**Reason:** the platform supplies a per-result status slot — a `status`
+field on every element of the `/api/calls` response's `results[]`,
+present in all four committed Schulmanager captures — and that slot is
+observed, but no capture exhibits a failure value in it, so the failure's
+shape and the connector's correct response to it are both unevidenced.
+Specifying a representation now would be specifying against an imagined
+failure rather than an imagined wire format. This is ADR-004 decision 6's
+reasoning applied to a second axis.
 
 **Consequence:** the first connector to meet a partial failure decides, and
-that decision is the evidence this question needs. Until then a connector
-raises rather than dropping silently, which is what the private
-Schulmanager connector does.
+that decision is the evidence this question needs.
 
 ### 4. `ProvenanceEnvelope.request` gains an optional `logical_call`
 
@@ -104,6 +112,21 @@ on the envelope for the detail call — generalises one platform's fetch
 shape into a field every concept carries, which is the error ADR-005
 decision 3 avoided.
 
+Unlike `request.index`, which records a request's position inside the
+capture's `requests[]` array and which a connector reading live data
+therefore cannot populate, `logical_call` is populated by the connector:
+a connector that omits it leaves the row's provenance reading `POST
+/api/calls`, which is the condition this decision exists to remove.
+Absence continues to mean the URL identifies the call, as it does on the
+capture side.
+
+A connector's `logical_call` values must match those recorded in the
+platform's committed fixture rather than being retyped from the
+platform's documentation or invented at the call site, on the precedent
+of the WebUntis connector reading its `url_template` from the committed
+fixture. For Schulmanager the committed values are `get-letters`,
+`letter-mailing-setting` and `letter-detail`.
+
 **Consequence:** the capture model and the normalized envelope now carry the
 same field name with different validation owners. On the capture side
 ADR-004 decision 4 splits it — grammar in the CLI, non-emptiness in the
@@ -117,10 +140,14 @@ For Schulmanager letters that is the list call, not the detail call: the
 envelope's `logical_call` names the call whose response supplied the row's
 identity fields.
 
-**Reason:** provenance answers where a record came from, and the record's
-identity — its `source_record_id` — comes from the list. Naming the detail
-call would make two rows fetched in one list indistinguishable in
-provenance while their bodies differ.
+**Reason:** `logical_call` names the logical call that established the
+row's identity, not every call that contributed a field to it: the
+envelope's identity triple — `source_platform`, `source_instance`,
+`source_record_id` — is what provenance is provenance of, and for a
+Schulmanager letter that identity comes from the list call. Naming the
+detail call would name a call that did not supply the row's identity. This
+does not distinguish two rows fetched from one list, and nothing in
+`logical_call` is intended to: `source_record_id` does that.
 
 **Consequence:** the envelope under-describes an N+1 row: the body's own
 request is not named anywhere. Recorded as a known limit of the singular
