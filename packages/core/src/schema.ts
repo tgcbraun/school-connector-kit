@@ -81,8 +81,20 @@ export const ProvenanceEnvelope = z.object({
     status: z.literal(200),
     /** The request's URL template: shape only, never private values. */
     url_template: z.string(),
-    /** Position of this request inside the capture's `requests[]` array. */
+    /**
+     * Position of this request inside the capture's `requests[]` array. A
+     * connector reading live data has no capture `requests[]` array and
+     * therefore does not populate it.
+     */
     index: z.int().nonnegative().optional(),
+    /**
+     * The platform-scoped logical call that established this row's identity:
+     * opaque, and never a cross-platform join key (ADR-004 decision 1).
+     * Optional, and absence means the URL identifies the call. Unlike
+     * `index`, a connector populates this, and its values must match those
+     * recorded in the platform's committed fixture.
+     */
+    logical_call: z.string().min(1).optional(),
   }),
 });
 export type ProvenanceEnvelope = z.infer<typeof ProvenanceEnvelope>;

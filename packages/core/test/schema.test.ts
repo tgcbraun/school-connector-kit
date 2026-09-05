@@ -132,6 +132,7 @@ const schulmanagerEnvelope: ProvenanceEnvelope = {
     status: 200,
     url_template: "/api/calls",
     index: 0,
+    logical_call: "get-letters",
   },
 };
 
@@ -471,6 +472,32 @@ describe("ProvenanceEnvelope — captured_at offset discipline and request.metho
         request: { ...webuntisEnvelope.request, method: "POST" },
       }).success,
     ).toBe(true);
+  });
+  it("accepts a request carrying the committed logical_call get-letters", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...schulmanagerEnvelope,
+        request: { ...schulmanagerEnvelope.request, logical_call: "get-letters" },
+      }).success,
+    ).toBe(true);
+  });
+  it("accepts a request omitting logical_call", () => {
+    const { logical_call: _omitted, ...requestWithoutLogicalCall } =
+      schulmanagerEnvelope.request;
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...schulmanagerEnvelope,
+        request: requestWithoutLogicalCall,
+      }).success,
+    ).toBe(true);
+  });
+  it("rejects a request carrying an empty logical_call", () => {
+    expect(
+      ProvenanceEnvelope.safeParse({
+        ...schulmanagerEnvelope,
+        request: { ...schulmanagerEnvelope.request, logical_call: "" },
+      }).success,
+    ).toBe(false);
   });
 });
 

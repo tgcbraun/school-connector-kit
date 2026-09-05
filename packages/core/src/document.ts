@@ -14,6 +14,7 @@ import {
   NormalizedMessage,
   PartialDay,
   PlatformDateInt,
+  PlatformInstant,
   ProvenanceEnvelope,
   SCHEMA_VERSION,
   StudentReference,
@@ -74,6 +75,7 @@ export function buildDocument(): Record<string, unknown> {
       weekday_slot: toJSONSchema(WeekdaySlot),
       partial_day: toJSONSchema(PartialDay),
       day_only: toJSONSchema(DayOnly),
+      platform_instant: toJSONSchema(PlatformInstant),
       date_value: toJSONSchema(DateValue),
     },
   }) as Record<string, unknown>;

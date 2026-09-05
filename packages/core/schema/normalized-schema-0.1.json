@@ -61,6 +61,10 @@
                   "minimum": 0,
                   "type": "integer"
                 },
+                "logical_call": {
+                  "minLength": 1,
+                  "type": "string"
+                },
                 "method": {
                   "enum": [
                     "GET",
@@ -225,6 +229,10 @@
                   "maximum": 9007199254740991,
                   "minimum": 0,
                   "type": "integer"
+                },
+                "logical_call": {
+                  "minLength": 1,
+                  "type": "string"
                 },
                 "method": {
                   "enum": [
@@ -412,6 +420,10 @@
                   "minimum": 0,
                   "type": "integer"
                 },
+                "logical_call": {
+                  "minLength": 1,
+                  "type": "string"
+                },
                 "method": {
                   "enum": [
                     "GET",
@@ -533,6 +545,10 @@
                                   "maximum": 9007199254740991,
                                   "minimum": 0,
                                   "type": "integer"
+                                },
+                                "logical_call": {
+                                  "minLength": 1,
+                                  "type": "string"
                                 },
                                 "method": {
                                   "enum": [
@@ -695,6 +711,10 @@
                       "minimum": 0,
                       "type": "integer"
                     },
+                    "logical_call": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
                     "method": {
                       "enum": [
                         "GET",
@@ -810,6 +830,10 @@
                       "maximum": 9007199254740991,
                       "minimum": 0,
                       "type": "integer"
+                    },
+                    "logical_call": {
+                      "minLength": 1,
+                      "type": "string"
                     },
                     "method": {
                       "enum": [
@@ -974,6 +998,10 @@
                       "maximum": 9007199254740991,
                       "minimum": 0,
                       "type": "integer"
+                    },
+                    "logical_call": {
+                      "minLength": 1,
+                      "type": "string"
                     },
                     "method": {
                       "enum": [
@@ -1160,6 +1188,10 @@
                       "minimum": 0,
                       "type": "integer"
                     },
+                    "logical_call": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
                     "method": {
                       "enum": [
                         "GET",
@@ -1252,6 +1284,10 @@
                       "minimum": 0,
                       "type": "integer"
                     },
+                    "logical_call": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
                     "method": {
                       "enum": [
                         "GET",
@@ -1342,6 +1378,10 @@
               "minimum": 0,
               "type": "integer"
             },
+            "logical_call": {
+              "minLength": 1,
+              "type": "string"
+            },
             "method": {
               "enum": [
                 "GET",
@@ -1425,6 +1465,10 @@
                   "maximum": 9007199254740991,
                   "minimum": 0,
                   "type": "integer"
+                },
+                "logical_call": {
+                  "minLength": 1,
+                  "type": "string"
                 },
                 "method": {
                   "enum": [
@@ -1547,6 +1591,10 @@
                               "maximum": 9007199254740991,
                               "minimum": 0,
                               "type": "integer"
+                            },
+                            "logical_call": {
+                              "minLength": 1,
+                              "type": "string"
                             },
                             "method": {
                               "enum": [
@@ -1708,6 +1756,10 @@
                   "maximum": 9007199254740991,
                   "minimum": 0,
                   "type": "integer"
+                },
+                "logical_call": {
+                  "minLength": 1,
+                  "type": "string"
                 },
                 "method": {
                   "enum": [
@@ -2086,6 +2138,26 @@
           "maximum": 9007199254740991,
           "minimum": -9007199254740991,
           "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "type": "object"
+    },
+    "platform_instant": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "platform_instant",
+          "type": "string"
+        },
+        "value": {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+          "type": "string"
         }
       },
       "required": [

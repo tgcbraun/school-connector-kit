@@ -3,7 +3,7 @@
  * byte-identical (canonicalized) to what the Zod definitions generate RIGHT
  * NOW — i.e. the document is generated from Zod, not hand-written. This test
  * also pins the structural facts of the 0.1 surface: the dialect, the set of
- * concepts, the four distinct date forms, and that "absence" is NOT modeled.
+ * concepts, the five distinct date forms, and that "absence" is NOT modeled.
  */
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -58,7 +58,7 @@ describe("committed JSON Schema document", () => {
       '"assessment"',
     );
   });
-  it("models exactly the four distinct date forms plus the union", () => {
+  it("models exactly the five distinct date forms plus the union", () => {
     const keys = Object.keys(committed().date_forms as Record<string, unknown>)
       .sort();
     expect(keys).toEqual([
@@ -66,6 +66,7 @@ describe("committed JSON Schema document", () => {
       "day_only",
       "partial_day",
       "platform_date_int",
+      "platform_instant",
       "weekday_slot",
     ]);
   });
@@ -79,14 +80,16 @@ describe("committed JSON Schema document", () => {
       forms.weekday_slot?.properties?.kind?.const,
       forms.partial_day?.properties?.kind?.const,
       forms.day_only?.properties?.kind?.const,
+      forms.platform_instant?.properties?.kind?.const,
     ];
     expect(kinds).toEqual([
       "platform_date_int",
       "weekday_slot",
       "partial_day",
       "day_only",
+      "platform_instant",
     ]);
-    expect(new Set(kinds).size).toBe(4);
+    expect(new Set(kinds).size).toBe(5);
   });
   it("pins additionalProperties:false on the day-carrying forms (no time slot to add)", () => {
     const forms = committed().date_forms as Record<string, { additionalProperties?: boolean }>;
@@ -141,5 +144,18 @@ describe("committed JSON Schema document", () => {
     ]) {
       expect(key in props).toBe(true);
     }
+  });
+  it("pins an optional logical_call on the envelope's request object", () => {
+    const props = (
+      (committed().concepts as Record<string, unknown>).provenance_envelope as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+    const request = props.request as {
+      properties: Record<string, unknown>;
+      required: string[];
+    };
+    expect("logical_call" in request.properties).toBe(true);
+    expect(request.required).not.toContain("logical_call");
   });
 });

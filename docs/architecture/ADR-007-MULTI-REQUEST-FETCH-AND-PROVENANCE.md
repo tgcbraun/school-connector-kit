@@ -1,7 +1,7 @@
 # ADR-007 — Multi-request fetch and provenance
 
 **Date:** 2026-09-05
-**Status:** Proposed
+**Status:** Accepted
 **Supersedes:** nothing
 **Related:** ADR-003 (connector runtime contract), ADR-004 (capture request identity — this ADR closes its open item "whether ADR-003's fetcher signature accommodates the N+1 letters fetch"), ADR-006 (platform-supplied instants), `packages/core/src/connector/connector.ts`, `packages/core/src/schema.ts`
 
