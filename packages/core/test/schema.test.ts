@@ -120,6 +120,21 @@ const kikomInfoEnvelope: ProvenanceEnvelope = {
   },
 };
 
+const schulmanagerEnvelope: ProvenanceEnvelope = {
+  concept: "provenance_envelope",
+  source_platform: "schulmanager",
+  source_instance: "instance-placeholder-4",
+  source_record_id: "record-placeholder-4",
+  allowlist_version: "schulmanager-get-letters-v1",
+  captured_at: "2026-09-02T10:54:00Z",
+  request: {
+    method: "POST",
+    status: 200,
+    url_template: "/api/calls",
+    index: 0,
+  },
+};
+
 // ---------------------------------------------------------------------------
 
 describe("ProvenanceEnvelope — populated by all three platforms", () => {
@@ -165,7 +180,7 @@ describe("ProvenanceEnvelope — populated by all three platforms", () => {
 
 // ---------------------------------------------------------------------------
 
-describe("date model — four distinct forms, no collapse, no midnight-UTC", () => {
+describe("date model — five distinct forms, no collapse, no midnight-UTC", () => {
   it("accepts a PlatformDateInt (webuntis date/dueDate are typed int in the fixture)", () => {
     const r = PlatformDateInt.safeParse({ kind: "platform_date_int", value: 20000 });
     expect(r.success).toBe(true);
@@ -297,7 +312,7 @@ describe("date model — four distinct forms, no collapse, no midnight-UTC", () 
       }).success,
     ).toBe(false);
   });
-  it("discriminates all four kinds in DateValue", () => {
+  it("discriminates the four pre-ADR-006 kinds in DateValue", () => {
     for (const payload of [
       { kind: "platform_date_int", value: 1 },
       {
@@ -676,7 +691,7 @@ describe("Event — kikom term", () => {
 
 // ---------------------------------------------------------------------------
 
-describe("Message — kikom information", () => {
+describe("Message — kikom informationen and schulmanager letters", () => {
   it("accepts the fixture shape", () => {
     const r = Message.safeParse({
       concept: "message",
@@ -713,6 +728,48 @@ describe("Message — kikom information", () => {
         body: "x",
         link_count: 2,
         provenance: kikomInfoEnvelope,
+      }).success,
+    ).toBe(false);
+  });
+  it("accepts a Schulmanager-shaped message (platform_instant date, no link_count)", () => {
+    expect(
+      Message.safeParse({
+        concept: "message",
+        date: { kind: "platform_instant", value: "2026-09-02T10:54:00Z" },
+        body: "placeholder-body",
+        provenance: schulmanagerEnvelope,
+      }).success,
+    ).toBe(true);
+  });
+  it("accepts the Kikom shape with link_count absent", () => {
+    const without = {
+      concept: "message",
+      date: {
+        kind: "day_only",
+        year: 2026,
+        month: 11,
+        day: 30,
+        year_provenance: {
+          year_stated_by_platform: true,
+          stated_digits: 2,
+          century_inferred: true,
+          inference_by: "normalizer",
+        },
+      },
+      body: "placeholder-body",
+      link_count: 2,
+      provenance: kikomInfoEnvelope,
+    } as Record<string, unknown>;
+    delete without.link_count;
+    expect(Message.safeParse(without).success).toBe(true);
+  });
+  it("rejects a platform_date_int as the message date", () => {
+    expect(
+      Message.safeParse({
+        concept: "message",
+        date: { kind: "platform_date_int", value: 20000 },
+        body: "x",
+        provenance: schulmanagerEnvelope,
       }).success,
     ).toBe(false);
   });

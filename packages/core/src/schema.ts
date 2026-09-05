@@ -392,23 +392,31 @@ export const Event = z.object({
 export type Event = z.infer<typeof Event>;
 
 /**
- * Message — Kikom Informationen.
+ * Message — Kikom Informationen and Schulmanager letters, one concept.
  *
- * Date: a DayOnly whose two-digit year carries its DISTINCT
- * century-inference provenance (per DayOnly.year_provenance). Body column:
- * non-zero length in the capture, values redacted. `link_count` pins the
- * PRESENCE of the two hyperlink columns the connector does not read (their
- * targets were never captured — README gap G7).
+ * Date: Kikom Informationen supplies a DayOnly whose two-digit year
+ * carries its DISTINCT century-inference provenance (per
+ * DayOnly.year_provenance); Schulmanager letters supply a
+ * PlatformInstant. The two forms are alternatives on this one concept —
+ * the schema provides no conversion between them. Body: required on the
+ * concept; the committed evidence is the Kikom column, non-zero length in
+ * the capture, values redacted.
  *
- * The fixture's `updated` column is a placeholder (length 1) with the
+ * `link_count` is OPTIONAL because it pins the PRESENCE of Kikom's two
+ * hyperlink columns the connector does not read (their targets were never
+ * captured — README gap G7). No other platform in the corpus evidences a
+ * link column, so on a Schulmanager letter its absence is a true statement
+ * where 0 would be a false one.
+ *
+ * The Kikom fixture's `updated` column is a placeholder (length 1) with the
  * format never pinned, so 0.1 deliberately does NOT model an `updated`
  * field — README gap G8.
  */
 export const Message = z.object({
   concept: z.literal("message"),
-  date: DayOnly,
+  date: z.discriminatedUnion("kind", [DayOnly, PlatformInstant]),
   body: z.string(),
-  link_count: z.int().nonnegative(),
+  link_count: z.int().nonnegative().optional(),
   provenance: ProvenanceEnvelope,
 });
 export type Message = z.infer<typeof Message>;
