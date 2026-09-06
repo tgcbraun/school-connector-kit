@@ -88,7 +88,7 @@ Tenant identity values are dropped in all captures (G3).
 - **G2 StudentReference id shape** — dieschulapp shows a student scope; the identity block was dropped wholesale.
 - **G3 ProvenanceEnvelope `source_instance`** — tenant identity present at source, values dropped from every capture.
 - **G4 PartialDay `sequence_position` per-row values** — the ordering mechanism is evidenced; no per-row value is pinned (redacted).
-- **G5 WeekdaySlot weekday encoding** — int range 0–4 observed; which weekday each value means is not established by the fixture.
+- **G5 WeekdaySlot weekday encoding** — RESOLVED. Monday-origin: 0 is Monday, established by a live probe (ADR-008 decision 5) after the fixture alone left it open. Two single-day responses were observed directly — weekday 0 for a known Monday, weekday 2 for a known Wednesday; values 1, 3 and 4 are interpolated between them. Values 5 and 6, permitted by the schema's range, remain unobserved.
 - **G6 WebUntis date-int encoding** — `date`/`dueDate` are typed int with redacted values: digit count, range, epoch, and unit are not established; 0.1 models no components.
 - **G7 Message link targets** — Kikom Informationen's hyperlink columns are present and their count is pinned when a message carries one; the targets were never captured. `link_count` is optional on the concept because no other platform in the corpus evidences a link column — its absence is a true statement where 0 would be a false one.
 - **G8 Message `updated`** — placeholder column (length 1) with format never pinned; deliberately not modeled.

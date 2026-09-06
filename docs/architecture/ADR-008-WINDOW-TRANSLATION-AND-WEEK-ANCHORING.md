@@ -1,7 +1,7 @@
 # ADR-008 — Window translation and week anchoring
 
 **Date:** 2026-09-05
-**Status:** Proposed
+**Status:** Accepted
 **Supersedes:** nothing
 **Related:** ADR-003 (connector runtime contract — decision 7 defines FetchWindow's
 encoding and side, not its semantics), ADR-006 (platform-supplied instants),
@@ -120,23 +120,41 @@ existing `WeekdaySlot` instance stays valid and the widening is a superset.
 nesting inside `week_anchor` leaves that strictness unaffected, since
 `week_anchor` remains one known key at the extended object's top level.
 
-### 5. The DieSchulApp connector is blocked on G5, and this ADR states the dependency rather than working around it
+### 5. The weekday encoding is ISO Monday-origin, established by probe rather than assumed
 
-`weekday` is observed as 0–4 across 38 entries in one capture and its identity
-is unestablished. Decision 2's clip and decision 4's consumer-side composition
-both require it. The connector is not implemented until G5 is bound by
-evidence.
+`WeekdaySlot.weekday` is Monday-origin: 0 is Monday. A connector composing a
+civil date from `week_anchor.date` and `weekday` does so on that basis.
 
-**Reason:** 0–4 across a five-day school week is consistent with Monday-origin
-and with other origins whose absent days happen to be the weekend. Plausibility
-is not evidence, and the private connector's Monday-origin arithmetic is that
-connector's belief. Binding it costs one probe request: if `week=false` is
-honoured, a single non-Monday date returns only entries carrying that day's
-`weekday` value, which binds the encoding directly.
+**Reason:** a private probe against the live tenant on 2026-09-06 issued a
+request for a known Monday with `week=false` and received 6 entries all
+carrying `weekday: 0`, and a request for a known Wednesday with `week=false`
+and received 9 entries all carrying `weekday: 2`. Two independent single-day
+responses agreeing with ISO Monday-origin is evidence; the private Family
+Dashboard connector's identical arithmetic was belief, and is now corroborated
+rather than relied upon.
 
-**Consequence:** the probe precedes the connector. If `week=false` is not
-honoured, the encoding needs a different falsifier and this ADR's decision 2 is
-unimplementable for DieSchulApp until one is found.
+**Consequence:** values 1, 3 and 4 are interpolated between two observed
+points, not individually observed. The interpolation is a contiguous integer
+sequence over a five-day school week and the risk of it being wrong is low,
+but it is an interpolation and the register says so. Values 5 and 6, which the
+schema's `min(0).max(6)` permits, remain entirely unobserved.
+
+### 6. The platform normalises any in-week date to its containing week
+
+`date` need not be a Monday. The same probe sent a Wednesday with `week=true`
+and received 41 entries spanning weekdays 0 through 4 — the whole containing
+week, not the remainder of it. `week=false` returns exactly the named day.
+
+**Reason:** observed directly, three requests, all HTTP 200.
+
+**Consequence:** decision 2's covering requests need no Monday arithmetic; any
+date within a target week selects that week. `week_anchor.date` records the
+date the connector requested, which is truthful whichever day was sent, but a
+consumer must read it as naming the containing week rather than the week's
+first day. The requirement that `date` be a Monday, previously attributed to
+the platform, was a guard clause in the private evidence shim
+(`private-fixtures/dieschulapp/fetch_timetable.py`) and was never a platform
+constraint.
 
 ## Consequences
 
@@ -150,12 +168,11 @@ unimplementable for DieSchulApp until one is found.
 - Decisions 1, 2 and 3 change no file; they constrain every connector written
   after them, including the two already published, neither of which violates
   them — WebUntis takes a server-side window and Schulmanager accepts none.
-- G5 is rewritten as a connector blocker rather than a descriptive gap.
+- G5 in `packages/core/README.md` is rewritten to state the established
+  encoding, keeping its identifier per the register's stability rule.
 
 ## Not decided by this ADR
 
-- Whether DieSchulApp accepts a non-Monday `date` or honours `week=false`. Both
-  are unobserved; decision 5 makes finding out a prerequisite.
 - `TimetableEntry` identity on this platform. The private connector deduplicates
   on course plus weekday plus slot rather than on the entry's own `id`, with a
   comment that parallel entries share a class slot. That bears on
