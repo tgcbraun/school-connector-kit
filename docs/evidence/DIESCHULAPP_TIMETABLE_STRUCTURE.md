@@ -1,11 +1,15 @@
-# DieSchulApp current-timetable structure — private evidence (round 1)
+# DieSchulApp current-timetable structure — evidence (round 2)
 
-Status: private working evidence. Contains **no real string values** (no
-forename, surname, displayname, teacher name, class name, room name,
-institution name, or any other text from the payload; no id values either).
-Not committed, not shareable as-is. Derived facts only, produced by
+Status: committed and public. Derived facts only, produced by
 `private-fixtures/dieschulapp/analyze_timetable.py` from
-`private-fixtures/dieschulapp/raw/timetable-20260824.json`.
+`private-fixtures/dieschulapp/raw/timetable-20260824.json`, and by
+`private-fixtures/dieschulapp/probe.py` — which writes nothing to disk and
+prints derived facts only. Contains **no real string values** (no forename,
+surname, displayname, teacher name, class name, room name, institution name,
+or any other text from the payload; no id values either). Field names and
+JSON types are published **deliberately**: a connector author cannot know
+which fields to avoid reading without knowing they exist. That is the same
+line ADR-002 draws for query parameter names.
 
 ## Endpoint / handshake
 
@@ -120,6 +124,61 @@ d. **Structural differences vs. the WebUntis homework payload that a
    5. **Null-but-present fields** (`room`, `timetableBlock`) and the
       empty `vacations[]` — element shapes unknown; same trap as
       WebUntis `attachments[]`. Do not assume schemas.
+
+## Probe evidence (2026-09-06 session)
+
+Round 1 was derived from the 2026-08-24 capture alone. On 2026-09-06, two
+probe runs against the same tenant, both using
+`private-fixtures/dieschulapp/probe.py`, which writes nothing to disk and
+prints derived facts only; the second reproduced the first exactly. Each run
+issued three requests in one session, all HTTP 200:
+
+```text
+R1  date=2026-09-07 (a Monday)     week=false   students=1  entries=6   distinct weekday values [0]
+R2  date=2026-09-09 (a Wednesday)  week=true    students=1  entries=41  distinct weekday values [0,1,2,3,4]
+R3  date=2026-09-09 (a Wednesday)  week=false   students=1  entries=9   distinct weekday values [2]
+```
+
+Every entry carried an integer weekday; none was missing.
+
+**1. The weekday encoding is ISO Monday-origin.** R1 and R3 are two
+independent single-day responses and both agree with ISO Monday-origin: 0 is
+Monday, 2 is Wednesday. This answers open question 1 of round 1. The
+weekdays 1, 3 and 4 seen in R2 are **interpolated** between the two
+observed points, not observed points themselves; 5 and 6 remain entirely
+unobserved.
+
+**2. `week=false` returns exactly the named day.** That is what makes R1
+and R3 discriminating rather than suggestive.
+
+**3. A non-Monday `date` with `week=true` returns the whole containing
+week, not the remainder of it.** R2 named a Wednesday and received 41
+entries spanning weekdays 0 through 4. The platform normalises any in-week
+date to its containing week.
+
+**Correction to round 1.** Round 1's endpoint section presents
+`date=<the requested Monday>` and `week=true` as the endpoint's shape. The
+Monday requirement was never a platform property: it was a guard clause in
+`private-fixtures/dieschulapp/fetch_timetable.py`, enforced client-side
+before any request was issued, and `week=true` was hardcoded in the same
+file. The platform accepts a non-Monday date and honours `week=false`. A
+constraint attributed to a platform may be a property of the client that
+observed it.
+
+**The student block, structural.** `students=1` on all three requests, so
+the multi-student case remains unevidenced. Each block carries the keys
+`['entries', 'student']`; the `student` object carries the keys
+`['displayname', 'forename', 'id', 'mainCourse', 'surname']`, with `id` an
+int and `displayname`, `forename` and `surname` strings. `mainCourse` is an
+object carrying the keys `['channel', 'externalId', 'externalIds', 'id',
+'isSoftDeleted', 'name', 'type']`. Only `student.id` is usable as a
+normalized identifier; every other key on that block is pupil or class
+identity that the fixture allowlist denies outright.
+
+**Provenance, stated plainly.** The probe writes nothing, so no committed
+artifact in this repository holds its raw output; the lines above are the
+derived facts as printed. This is weaker provenance than a capture, and the
+document says so rather than leaving a reader to notice.
 
 ## Open questions
 
