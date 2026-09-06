@@ -1,7 +1,7 @@
 # ADR-010 — Transport method widening
 
 **Date:** 2026-09-06
-**Status:** Proposed
+**Status:** Accepted
 **Supersedes:** nothing
 **Related:** ADR-003 (connector runtime contract — decision 2 defines the
 Transport and its string bodies), `packages/core/src/connector/transport.ts`,

@@ -1,7 +1,7 @@
 # ADR-009 — Timetable entry identity on a weekly template
 
 **Date:** 2026-09-06
-**Status:** Proposed
+**Status:** Accepted
 **Supersedes:** nothing
 **Related:** ADR-004 (capture request identity), ADR-008 (window translation and
 week anchoring — this ADR decides what ADR-008's "Not decided" list defers),
