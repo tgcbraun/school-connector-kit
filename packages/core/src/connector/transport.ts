@@ -12,7 +12,15 @@
  */
 import { ConnectorError } from "./errors.js";
 
-export type HttpMethod = "GET" | "POST";
+/**
+ * The verbs the Transport accepts. "PUT" was added on evidence (ADR-010):
+ * DieSchulApp's login is `PUT /api/1.0/admin/login/`, as the committed
+ * capture at `fixtures/dieschulapp/variant-001/` and the connector in
+ * `packages/connectors/dieschulapp/` both record. This type widens when a
+ * platform proves it must — never in anticipation — and every such widening
+ * is a superset: every previously valid `HttpRequest` stays valid.
+ */
+export type HttpMethod = "GET" | "POST" | "PUT";
 
 export interface HttpRequest {
   readonly method: HttpMethod;

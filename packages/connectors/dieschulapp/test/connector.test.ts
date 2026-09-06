@@ -24,7 +24,6 @@ import type {
   HttpRequest,
   HttpResponse,
   TimetableEntry as CoreTimetableEntry,
-  WeekdaySlot,
 } from "@school-connector-kit/core";
 import { createDieSchulAppConnector } from "../src/connector.js";
 
@@ -337,9 +336,12 @@ async function fetchRows(
 }
 
 /** The weekday_slot location of a parsed row (kind-checked first). */
-function weekdayLocation(row: CoreTimetableEntry): WeekdaySlot {
+function weekdayLocation(row: CoreTimetableEntry) {
   expect(row.location.kind).toBe("weekday_slot");
-  return row.location as WeekdaySlot;
+  if (row.location.kind !== "weekday_slot") {
+    throw new Error("weekdayLocation: the row did not carry a weekday_slot location");
+  }
+  return row.location;
 }
 
 /* ————————————————————————————————————— tests ————————————————————————————————————— */
@@ -430,11 +432,12 @@ describe("DieSchulApp connector: happy path (no window)", () => {
 
     // Second row: subject without acronym (the acronym key must be absent,
     // not null), the rest as the schema requires.
-    expect(weekdayLocation(rows[1]).subject).toEqual({
+    const second = rows[1]!;
+    expect(weekdayLocation(second).subject).toEqual({
       name: "placeholder-subject-beta",
     });
-    expect(rows[1].location).not.toHaveProperty("acronym");
-    expect(rows[1].provenance.source_record_id).toBe("502");
+    expect(second.location).not.toHaveProperty("acronym");
+    expect(second.provenance.source_record_id).toBe("502");
 
     // ADR-009 decision 2 — `occurrence` is not set for this platform; the
     // same goes for `allowlist_version` and the request index.
@@ -520,7 +523,7 @@ describe("DieSchulApp connector: window translation (ADR-008)", () => {
     ]);
 
     // Each row's anchor is the date ITS request named.
-    expect(weekdayLocation(rows[0]).week_anchor.date).toBe("2026-08-31");
+    expect(weekdayLocation(rows[0]!).week_anchor.date).toBe("2026-08-31");
     for (const row of rows.slice(1)) {
       expect(weekdayLocation(row).week_anchor.date).toBe("2026-09-07");
     }
@@ -557,7 +560,7 @@ describe("DieSchulApp connector: window translation (ADR-008)", () => {
     });
 
     expect(rows.map((row) => row.provenance.source_record_id)).toEqual(["701", "702"]);
-    expect(weekdayLocation(rows[1]).week_anchor.date).toBe("2026-09-07");
+    expect(weekdayLocation(rows[1]!).week_anchor.date).toBe("2026-09-07");
   });
 
   it("needs exactly one request for a whole-week window and keeps both bounds", async () => {
@@ -816,10 +819,11 @@ describe("DieSchulApp connector: fetch guards", () => {
       window: { fromInclusive: "2026-09-01", toInclusive: "2026-09-06" },
     });
     expect(rows).toHaveLength(1);
-    expect(rows[0].location).not.toHaveProperty("subject");
+    const row = rows[0]!;
+    expect(row.location).not.toHaveProperty("subject");
     // Everything else about the row is intact.
-    expect(rows[0].provenance.source_record_id).toBe("901");
-    expect(weekdayLocation(rows[0]).weekday).toBe(1);
+    expect(row.provenance.source_record_id).toBe("901");
+    expect(weekdayLocation(row).weekday).toBe(1);
   });
 });
 
