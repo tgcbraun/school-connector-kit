@@ -156,6 +156,16 @@ export const WeekdaySlot = z.object({
   week_anchor: z.object({
     present_in_response: z.literal(false),
     resolution: z.literal("out_of_band_request_parameter"),
+    /**
+     * The value the request parameter named by `resolution` actually had,
+     * when a producer records it. A connector populates this; a fixture
+     * cannot, because the capture redacts the request's date value. The
+     * platform normalises any in-week date to its containing week, so this
+     * names the week the record belongs to rather than the week's first day
+     * (ADR-008 decision 6). Optional: every existing instance stays valid,
+     * and nothing here composes a civil date from it and `weekday`.
+     */
+    date: z.iso.date().optional(),
   }),
 });
 export type WeekdaySlot = z.infer<typeof WeekdaySlot>;
