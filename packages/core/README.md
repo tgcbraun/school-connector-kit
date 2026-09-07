@@ -112,6 +112,7 @@ Tenant identity values are dropped in all captures (G3).
 - **G26 TimetableEntry weekday_slot identity reaches onto location** — ADR-009 settled that a `weekday_slot` row's identity is the envelope triple plus a field on `location`, rather than the triple alone, because the platform repeats a row id across the weekly template. A generic consumer that joins on the identity triple alone will collide those rows, so it must special-case this location branch. The cost is recorded here rather than resolved: no fixture or run in the corpus demands a uniform identity across both location branches.
 - **G27 Transport cookie attributes are ignored** — ADR-011 puts the cookie jar in the Transport, and the implementation stores name and value only: `Domain`, `Path`, `Secure` and expiry are parsed off and discarded. That is adequate for the three single-origin connectors that exist and wrong in general — a multi-origin connector, or one whose platform scopes a cookie by path, would send a cookie where it should not. All three throwaway runners ignored these attributes too, so the limitation is inherited rather than introduced. Recorded as a known limitation, not a decision.
 - **G28 Set-Cookie recovery on hosts lacking getSetCookie** — the accessor is absent under Hermes on both iOS and Android (`docs/evidence/HERMES_HOST_PROBE.md`), where `Headers.get` returns the lines joined with `", "` (`docs/evidence/HERMES_MULTI_COOKIE_JOIN.md`). `packages/transport` splits that string at a comma and optional whitespace followed by a cookie name and `=`; the comma inside an `Expires` attribute is not a separator because a day number is not followed by `=`. The rule round-tripped three real cookies from a live WebUntis authentication exactly, element-for-element identical to what `getSetCookie` returns on a host that has it — WebUntis being the platform whose live run first showed three cookies set in one step. **The gap that remains is the residual case:** a cookie VALUE containing a comma, a token and `=` would still split wrongly. No platform in this project's corpus has been observed emitting one, and that absence is not evidence.
+- **G29 WebUntis auth_failed collapse hides the failing condition** — the WebUntis connector raises ConnectorError code `auth_failed` for five distinct conditions, so a caller cannot distinguish a rejected credential from a rejected configuration value; that cost two failed live runs on 2026-09-07 before a shape probe identified an invalid school name. The collapse is not itself wrong — the connector must not leak platform message text — but the caller is left without a discriminator. No decision is taken here on whether the code set widens (`docs/evidence/WEBUNTIS_TRANSPORT_FIRST_CONSUMER.md`).
 
 G0–G8 keep these identifiers; earlier cross-references remain valid.
 
@@ -146,7 +147,7 @@ Stated as a finding, precisely:
   placeholder shape values where the fixtures type a field with redacted
   content, and the verbatim envelope metadata committed in the fixture
   files. They pin that the schema accepts that shape and rejects the
-  evidence boundaries (the README gap register, G0–G28).
+  evidence boundaries (the README gap register, G0–G29).
 - **What the tests do NOT do:** the committed fixtures are structure-only
   and **carry no values**, so no instance can be constructed from them.
   Nothing in this suite is a schema-conformance validation of 0.1 against
@@ -157,4 +158,4 @@ Stated as a finding, precisely:
   value-free fixture cannot serve as a schema conformance test. A future
   connector implementation — running 0.1 against live platform data — is
   what will validate it. This is a statement of where the evidence ends,
-  not a deficiency; the gap register (G0–G28) records the rest.
+  not a deficiency; the gap register (G0–G29) records the rest.
