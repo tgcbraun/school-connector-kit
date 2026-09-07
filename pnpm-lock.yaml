@@ -42,6 +42,12 @@ importers:
         specifier: ^4.4.3
         version: 4.5.4
 
+  packages/transport:
+    dependencies:
+      '@school-connector-kit/core':
+        specifier: workspace:*
+        version: link:../core
+
   tools/capture: {}
 
 packages:
