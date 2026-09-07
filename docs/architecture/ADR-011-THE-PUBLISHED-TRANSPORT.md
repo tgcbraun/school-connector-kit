@@ -87,6 +87,28 @@ to prevent.
 decision waits for, at which point it is revisited. The contract widens on
 evidence and never ahead of it, which is the same rule ADR-010 records.
 
+### 5. The implementation lives in its own package, not behind `packages/core`'s entry point
+
+The Transport implementation ships as its own package rather than as a module
+under `packages/core/src/connector/`. A connector still depends only on
+`packages/core`, which continues to carry the interface.
+
+**Reason:** this is forced, not preferred. ADR-003 decision 9 forbids any
+module reachable from a package's entry point from referencing a DOM global
+or a Node built-in, and `packages/core`'s own closure test enforces it from
+`packages/core/src/index.ts` outward. An implementation must call the host's
+`fetch`, which is exactly such a reference, so exporting it from
+`packages/core` would fail that package's own portability test. The
+`document.ts` precedent — a module excluded by being unreachable rather than
+by being named — does not apply: those are build-time modules nobody imports
+at runtime, whereas a Transport is imported at runtime by every consumer, so
+hiding it behind unreachability would be the wrong shape.
+
+**Consequence:** the boundary becomes structural rather than disciplinary.
+`packages/core` stays portable and testably so; the Transport is openly
+host-dependent and carries no closure constraint, because it is the one
+component whose job is to touch the host.
+
 ## Alternatives considered
 
 - (a) Pass all response headers through and keep ADR-003 decision 3 enforced
@@ -111,8 +133,6 @@ evidence and never ahead of it, which is the same rule ADR-010 records.
   adequate for single-origin connectors, which is all three that exist.
   Recorded as a known limitation, not a decision.
 - Retries, timeouts, connection reuse. No evidence for any of them.
-- Where the implementation lives — `packages/core` or its own package. A
-  packaging question, not an architecture one.
 - The outgoing header's capitalisation. HTTP header names are
   case-insensitive, so the runners' disagreement is cosmetic; the
   implementation picks one.
