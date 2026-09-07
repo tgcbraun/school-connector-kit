@@ -1,7 +1,7 @@
 # ADR-011 — The published Transport
 
 **Date:** 2026-09-07
-**Status:** Proposed
+**Status:** Accepted
 **Supersedes:** nothing
 **Related:** ADR-001 (local-first TypeScript — the language bet the
 host question belongs to), ADR-003 (connector runtime contract — decision 2
