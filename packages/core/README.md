@@ -111,6 +111,7 @@ Tenant identity values are dropped in all captures (G3).
 - **G25 HttpMethod accepts PUT; ProvenanceEnvelope.request.method does not** — ADR-010 widened the connector-facing `HttpMethod` to `"GET" | "POST" | "PUT"` because DieSchulApp authenticates with a `PUT`, and deliberately did NOT widen the envelope's `request.method` enum, because no envelope in the corpus records a `PUT` and widening a pinned field with no producer is inventing. The two surfaces therefore differ by design: a connector may SEND a `PUT` and no envelope may RECORD one. The first connector that needs to record a PUT-established row is the evidence that reopens it.
 - **G26 TimetableEntry weekday_slot identity reaches onto location** — ADR-009 settled that a `weekday_slot` row's identity is the envelope triple plus a field on `location`, rather than the triple alone, because the platform repeats a row id across the weekly template. A generic consumer that joins on the identity triple alone will collide those rows, so it must special-case this location branch. The cost is recorded here rather than resolved: no fixture or run in the corpus demands a uniform identity across both location branches.
 - **G27 Transport cookie attributes are ignored** — ADR-011 puts the cookie jar in the Transport, and the implementation stores name and value only: `Domain`, `Path`, `Secure` and expiry are parsed off and discarded. That is adequate for the three single-origin connectors that exist and wrong in general — a multi-origin connector, or one whose platform scopes a cookie by path, would send a cookie where it should not. All three throwaway runners ignored these attributes too, so the limitation is inherited rather than introduced. Recorded as a known limitation, not a decision.
+- **G28 Set-Cookie recovery on hosts lacking getSetCookie** — `Headers.getSetCookie` does not exist under Hermes (`docs/evidence/HERMES_HOST_PROBE.md`), where `Headers.get` returns the header lines comma-joined instead. `packages/transport` falls back to that string and stores it whole, as one jar entry, because splitting it is ambiguous: a cookie value may contain a comma and an `Expires` attribute contains one by construction. Where the host set one cookie the fallback is correct; where it set several the Transport sends one malformed `Cookie` header rather than silently dropping a session. The WebUntis live run recorded in `docs/evidence/WEBUNTIS_SESSION_COOKIE_SCOPE.md` shows three cookies set in one step, so the case is real and unevidenced on a device — a live run under a host lacking the accessor is what would settle the split.
 
 G0–G8 keep these identifiers; earlier cross-references remain valid.
 
@@ -145,7 +146,7 @@ Stated as a finding, precisely:
   placeholder shape values where the fixtures type a field with redacted
   content, and the verbatim envelope metadata committed in the fixture
   files. They pin that the schema accepts that shape and rejects the
-  evidence boundaries (the README gap register, G0–G27).
+  evidence boundaries (the README gap register, G0–G28).
 - **What the tests do NOT do:** the committed fixtures are structure-only
   and **carry no values**, so no instance can be constructed from them.
   Nothing in this suite is a schema-conformance validation of 0.1 against
@@ -156,4 +157,4 @@ Stated as a finding, precisely:
   value-free fixture cannot serve as a schema conformance test. A future
   connector implementation — running 0.1 against live platform data — is
   what will validate it. This is a statement of where the evidence ends,
-  not a deficiency; the gap register (G0–G27) records the rest.
+  not a deficiency; the gap register (G0–G28) records the rest.

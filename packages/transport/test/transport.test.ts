@@ -241,3 +241,107 @@ describe("the fetch call (ADR-011 decision 4)", () => {
     expect(sentValue(1, "cookie")).toBe("placeholder-cookie-one=one");
   });
 });
+
+/* ———————————————— the Set-Cookie accessor paths ———————————————— */
+
+/**
+ * A canned response whose `Headers` has NO `getSetCookie` — the Hermes host
+ * shape from `docs/evidence/HERMES_HOST_PROBE.md`, where `Headers.get`
+ * returns the `Set-Cookie` lines already joined. It is pushed into the same
+ * fetch-stub queue as the real `Response`s above, so the fake-fetch
+ * mechanism is identical; only the `getSetCookie` accessor is absent.
+ */
+function joinedShape(
+  setCookie: string | null,
+  code = 200,
+  body = "",
+): Response {
+  const entries: [string, string][] =
+    setCookie === null ? [] : [["set-cookie", setCookie]];
+  const fakeHeaders: {
+    get(name: string): string | null;
+    [Symbol.iterator](): IterableIterator<[string, string]>;
+  } = {
+    get(name: string): string | null {
+      return name.toLowerCase() === "set-cookie" ? setCookie : null;
+    },
+    [Symbol.iterator]() {
+      return entries[Symbol.iterator]();
+    },
+  };
+  return {
+    status: code,
+    headers: fakeHeaders,
+    text: async (): Promise<string> => body,
+  } as unknown as Response;
+}
+
+describe("the Set-Cookie accessor paths", () => {
+  it("with getSetCookie available, stores one jar entry per line and sends them all in one Cookie header", async () => {
+    queue.push(
+      canned({
+        setCookies: [
+          "placeholder-cookie-one=one; Path=/",
+          "placeholder-cookie-two=two; Path=/",
+        ],
+      }),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    expect(sentNames(0)).not.toContain("cookie");
+    expect(sentNames(1)).toContain("cookie");
+    // Two jar entries, joined with "; " into one Cookie header.
+    expect(sentValue(1, "cookie")).toBe(
+      "placeholder-cookie-one=one; placeholder-cookie-two=two",
+    );
+  });
+
+  it("without getSetCookie, a single joined cookie becomes one jar entry and is sent", async () => {
+    queue.push(joinedShape("placeholder-cookie-one=one; Path=/"), canned({ code: 200 }));
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    expect(sentNames(1)).toContain("cookie");
+    expect(sentValue(1, "cookie")).toBe("placeholder-cookie-one=one");
+  });
+
+  it("without getSetCookie and a null set-cookie, the jar stays empty and no Cookie header is sent", async () => {
+    queue.push(joinedShape(null), canned({ code: 200 }));
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    expect(sentNames(1)).not.toContain("cookie");
+  });
+
+  it("without getSetCookie and a comma-joined two-cookie string, stores exactly ONE jar entry", async () => {
+    // Recorded limitation (gap register G28, packages/core/README.md): the
+    // joined string is NOT split — a cookie value may contain a comma and an
+    // Expires attribute contains one by construction — so it is stored whole
+    // as one jar entry. This is the recorded limitation, NOT correct
+    // behaviour: where the host set two cookies the Transport sends one
+    // malformed Cookie header instead of silently dropping a session.
+    queue.push(
+      joinedShape("placeholder-cookie-one=one, placeholder-cookie-two=two"),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    // Exactly ONE jar entry: the two lines were NOT split into two entries.
+    // If they had been, the value would be joined with "; "; it is not.
+    expect(sentValue(1, "cookie")).toBe(
+      "placeholder-cookie-one=one, placeholder-cookie-two=two",
+    );
+    expect(sentValue(1, "cookie")).not.toContain("; ");
+  });
+});

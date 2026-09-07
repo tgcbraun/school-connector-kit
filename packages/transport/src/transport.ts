@@ -22,6 +22,33 @@ import type {
 } from "@school-connector-kit/core";
 
 /**
+ * Read the response's `Set-Cookie` lines (ADR-011 decision 1, amended
+ * 2026-09-07).
+ *
+ * `Headers.getSetCookie` returns one entry per header line and is the
+ * correct accessor. It does not exist under Hermes — established by
+ * `docs/evidence/HERMES_HOST_PROBE.md` — where `Headers.get` returns the
+ * lines already joined with commas.
+ *
+ * The joined string is NOT split. A cookie value may contain a comma and
+ * an `Expires` attribute contains one by construction, so every split is
+ * a heuristic no evidence in this repository supports. The whole string
+ * is returned as one entry instead: correct where the host set one
+ * cookie, and visibly wrong rather than silently lossy where it set
+ * several. See the gap register.
+ */
+function readSetCookie(headers: Headers): readonly string[] {
+  const accessor = (headers as unknown as Record<string, unknown>)[
+    "getSetCookie"
+  ];
+  if (typeof accessor === "function") {
+    return (headers as unknown as { getSetCookie: () => string[] }).getSetCookie();
+  }
+  const joined = headers.get("set-cookie");
+  return joined === null ? [] : [joined];
+}
+
+/**
  * Create the fetch-based `Transport` (ADR-011 decisions 1–4).
  *
  * ADR-011 decision 2: the jar's lifetime is this instance. One factory call,
@@ -61,10 +88,10 @@ export function createFetchTransport(): Transport {
       // segment of each line is read, split at the first `=`, and stored
       // trimmed — attributes are deliberately discarded (ADR-011, not
       // decided: the attributes are a known limitation, not a decision).
-      // The call is bare on purpose: ADR-011 alternative (b) rejected
-      // guarding it against hosts that lack it, and the Hermes probe is the
-      // amendment channel if one does.
-      for (const raw of res.headers.getSetCookie()) {
+      // The accessor is chosen per call rather than assumed: ADR-011
+      // alternative (b) rejected guarding it, the Hermes probe found the host
+      // that lacks it, and the ADR was amended on that evidence.
+      for (const raw of readSetCookie(res.headers)) {
         const stop = raw.indexOf(";");
         const pair = stop === -1 ? raw : raw.slice(0, stop);
         const eq = pair.indexOf("=");
