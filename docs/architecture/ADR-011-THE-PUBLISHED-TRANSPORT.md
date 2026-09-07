@@ -1,7 +1,7 @@
 # ADR-011 — The published Transport
 
 **Date:** 2026-09-07
-**Status:** Accepted
+**Status:** Accepted (amended 2026-09-07 — see Amendment)
 **Supersedes:** nothing
 **Related:** ADR-001 (local-first TypeScript — the language bet the
 host question belongs to), ADR-003 (connector runtime contract — decision 2
@@ -136,3 +136,33 @@ component whose job is to touch the host.
 - The outgoing header's capitalisation. HTTP header names are
   case-insensitive, so the runners' disagreement is cosmetic; the
   implementation picks one.
+
+## Amendment — 2026-09-07, alternative (b) falsified by probe
+
+Alternative (b) rejected guarding the `getSetCookie` call on the grounds
+that it writes code against a platform nobody has run. That platform has
+now been run.
+
+A Hermes host probe — `docs/evidence/HERMES_HOST_PROBE.md` — establishes
+that `Headers.prototype.getSetCookie` does not exist under Hermes, while
+the `set-cookie` header itself remains present and readable through
+`Headers.get`. The rejection was correct in method and wrong in outcome:
+the guard was anticipation when it was proposed, and it is evidenced now.
+
+**What this amends.** Alternative (b)'s rejection no longer stands. The
+bare call in `packages/transport` cannot succeed on one of the two hosts
+ADR-003's caveat names.
+
+**What this does not amend.** Decisions 1 through 5 all stand. Decision 1
+in particular is strengthened rather than weakened: the header is readable
+on this host, so a Transport-owned jar remains achievable — the accessor
+is what is missing, not the session.
+
+**What is not decided here.** How the jar is filled where `getSetCookie`
+is absent. `Headers.get` returns a comma-joined string, and splitting it
+is ambiguous because a cookie value may contain a comma and an `Expires`
+attribute contains one by construction. The probe observed one cookie and
+did not exercise the joined case; the WebUntis live run recorded in
+`docs/evidence/WEBUNTIS_SESSION_COOKIE_SCOPE.md` shows three cookies set
+in one authentication step, so the case is real. That implementation
+question is deliberately left to the evidence that will settle it.
