@@ -113,18 +113,12 @@ export function createDieSchulAppConnector(
     if (response.status !== 200) {
       throw new ConnectorError("auth_failed", "authentication failed");
     }
-    try {
-      JSON.parse(response.body);
-    } catch {
-      throw new ConnectorError(
-        "auth_failed",
-        "the authentication response was not valid JSON",
-      );
-    }
-    // The session itself — the DSASESSID cookie this response establishes —
-    // lives with the Transport (ADR-003 decision 3). Its own fields
-    // (displayname, userRole, …) are read by no one here: nothing in this
-    // connector depends on them.
+    // The login response carries HTTP 200 and an empty body — observed
+    // live, twice — and the session is the DSASESSID cookie the response
+    // sets, which lives with the Transport (ADR-003 decision 3). Status 200
+    // is therefore the whole post-condition: this connector may not inspect
+    // Set-Cookie, so it verifies nothing further; the session's existence is
+    // proven by the next call succeeding, not by this one.
   }
 
   /** One current-timetable request for a single in-scope week; raw body out. */

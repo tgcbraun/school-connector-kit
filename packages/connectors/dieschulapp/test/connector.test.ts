@@ -101,7 +101,7 @@ const CREDENTIALS = {
  * `Set-Cookie` header is carried on the canned response so it looks like a
  * real one.
  */
-const LOGIN_OK_BODY = "{}";
+const LOGIN_OK_BODY = "";
 const LOGIN_OK_HEADERS = {
   "Set-Cookie": "DSASESSID=placeholder-session; HttpOnly; SameSite=Lax",
 };
@@ -629,11 +629,18 @@ describe("DieSchulApp connector: authentication", () => {
     await expectConnectorError(connector.authenticate(CREDENTIALS), "auth_failed");
   });
 
-  it("fails with auth_failed when the login body is not valid JSON", async () => {
+  it("accepts a 200 with an empty login body — status 200 is the whole post-condition", async () => {
     const transport = new ScriptedTransport();
-    transport.enqueue(200, "not-json", {});
+    // The platform fact (observed live, twice): the login body is empty and
+    // the session is the Set-Cookie, the Transport's to keep — so an empty
+    // body must authenticate, not throw.
+    transport.enqueue(200, LOGIN_OK_BODY, LOGIN_OK_HEADERS);
     const { connector } = makeConnector(transport);
-    await expectConnectorError(connector.authenticate(CREDENTIALS), "auth_failed");
+
+    await connector.authenticate(CREDENTIALS);
+
+    expect(transport.sent).toHaveLength(1);
+    expect(transport.sent[0]!.method).toBe("PUT");
   });
 
   it("fails with auth_failed when the credentials are not both strings, without sending anything", async () => {
