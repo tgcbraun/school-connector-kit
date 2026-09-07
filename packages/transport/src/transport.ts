@@ -22,20 +22,40 @@ import type {
 } from "@school-connector-kit/core";
 
 /**
+ * Split a comma-joined `Set-Cookie` string at a comma and optional
+ * whitespace that is followed by a cookie name and `=`.
+ *
+ * The separator is not derivable from a comma alone: an `Expires` attribute
+ * contains one by construction. The lookahead is what makes the split
+ * decidable — `Expires=Wed, 09 Jun 2027 …` continues with a bare day number,
+ * not with a token followed by `=`.
+ *
+ * The character class is RFC 6265's cookie-name token set restricted to the
+ * characters observed in practice. It is deliberately narrower than the full
+ * grammar: a name outside it fails to split rather than splitting wrongly.
+ */
+const SET_COOKIE_SEPARATOR = /,\s*(?=[A-Za-z0-9!#$%&'*+\-.^_`|~]+=)/;
+
+/**
  * Read the response's `Set-Cookie` lines (ADR-011 decision 1, amended
  * 2026-09-07).
  *
  * `Headers.getSetCookie` returns one entry per header line and is the
- * correct accessor. It does not exist under Hermes — established by
- * `docs/evidence/HERMES_HOST_PROBE.md` — where `Headers.get` returns the
- * lines already joined with commas.
+ * correct accessor. It does not exist under Hermes on iOS or Android,
+ * established by `docs/evidence/HERMES_HOST_PROBE.md` and
+ * `docs/evidence/HERMES_MULTI_COOKIE_JOIN.md`. Where it is absent,
+ * `Headers.get` returns the lines joined with `", "`, observed on both
+ * Hermes platforms.
  *
- * The joined string is NOT split. A cookie value may contain a comma and
- * an `Expires` attribute contains one by construction, so every split is
- * a heuristic no evidence in this repository supports. The whole string
- * is returned as one entry instead: correct where the host set one
- * cookie, and visibly wrong rather than silently lossy where it set
- * several. See the gap register.
+ * The joined string is split on `SET_COOKIE_SEPARATOR`, which
+ * round-tripped three real cookies from a live WebUntis authentication
+ * exactly — the split array was element-for-element identical to what
+ * `getSetCookie` returned on a host that has it.
+ *
+ * The residual limit: a cookie VALUE containing a comma followed by a
+ * token and `=` would still split wrongly. No platform in this project's
+ * corpus has been observed emitting one, and that absence is not evidence.
+ * See the gap register.
  */
 function readSetCookie(headers: Headers): readonly string[] {
   const accessor = (headers as unknown as Record<string, unknown>)[
@@ -45,7 +65,7 @@ function readSetCookie(headers: Headers): readonly string[] {
     return (headers as unknown as { getSetCookie: () => string[] }).getSetCookie();
   }
   const joined = headers.get("set-cookie");
-  return joined === null ? [] : [joined];
+  return joined === null ? [] : joined.split(SET_COOKIE_SEPARATOR);
 }
 
 /**

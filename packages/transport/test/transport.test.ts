@@ -321,13 +321,14 @@ describe("the Set-Cookie accessor paths", () => {
     expect(sentNames(1)).not.toContain("cookie");
   });
 
-  it("without getSetCookie and a comma-joined two-cookie string, stores exactly ONE jar entry", async () => {
-    // Recorded limitation (gap register G28, packages/core/README.md): the
-    // joined string is NOT split — a cookie value may contain a comma and an
-    // Expires attribute contains one by construction — so it is stored whole
-    // as one jar entry. This is the recorded limitation, NOT correct
-    // behaviour: where the host set two cookies the Transport sends one
-    // malformed Cookie header instead of silently dropping a session.
+  it("without getSetCookie, a comma-joined two-cookie string splits into both jar entries", async () => {
+    // This assertion previously pinned gap G28's limitation: the joined
+    // string was stored whole because no split was derivable from evidence
+    // this repository held. It is derivable now. The separator splits at a
+    // comma followed by a cookie name and `=`, and leaves the comma inside
+    // an Expires attribute alone, because a day number is not followed by
+    // `=`. Round-tripped against three real cookies from a live
+    // authentication: see docs/evidence/HERMES_MULTI_COOKIE_JOIN.md.
     queue.push(
       joinedShape("placeholder-cookie-one=one, placeholder-cookie-two=two"),
       canned({ code: 200 }),
@@ -337,11 +338,101 @@ describe("the Set-Cookie accessor paths", () => {
     await transport.send(plainRequest(URL_1));
     await transport.send(plainRequest(URL_2));
 
-    // Exactly ONE jar entry: the two lines were NOT split into two entries.
-    // If they had been, the value would be joined with "; "; it is not.
+    // Two jar entries, sent as one "; "-joined Cookie header.
     expect(sentValue(1, "cookie")).toBe(
-      "placeholder-cookie-one=one, placeholder-cookie-two=two",
+      "placeholder-cookie-one=one; placeholder-cookie-two=two",
     );
-    expect(sentValue(1, "cookie")).not.toContain("; ");
+  });
+
+  it("without getSetCookie, a two-cookie join with an Expires comma in the first cookie splits into both jar entries", async () => {
+    queue.push(
+      joinedShape(
+        "placeholder-cookie-a=alpha; Expires=Wed, 09 Jun 2027 10:18:14 GMT; Path=/, " +
+          "placeholder-cookie-b=beta; Path=/",
+      ),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    // The comma inside Expires did not split; the join between the two
+    // cookies did — both cookies reach the second request's Cookie header.
+    expect(sentValue(1, "cookie")).toBe(
+      "placeholder-cookie-a=alpha; placeholder-cookie-b=beta",
+    );
+  });
+
+  it("without getSetCookie, a three-cookie join splits into all three jar entries", async () => {
+    queue.push(
+      joinedShape(
+        "placeholder-cookie-a=alpha; Path=/, " +
+          "placeholder-cookie-b=beta; Path=/, " +
+          "placeholder-cookie-c=gamma; Path=/",
+      ),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    expect(sentValue(1, "cookie")).toBe(
+      "placeholder-cookie-a=alpha; placeholder-cookie-b=beta; placeholder-cookie-c=gamma",
+    );
+  });
+
+  it("without getSetCookie, a single cookie without any comma stays exactly one jar entry", async () => {
+    queue.push(
+      joinedShape("placeholder-cookie-one=one; Path=/"),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    expect(sentValue(1, "cookie")).toBe("placeholder-cookie-one=one");
+  });
+
+  it("without getSetCookie, a single cookie with an Expires comma stays one jar entry, not two", async () => {
+    queue.push(
+      joinedShape(
+        "placeholder-cookie-a=alpha; Expires=Wed, 09 Jun 2027 10:18:14 GMT; Path=/",
+      ),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    // The comma inside Expires is not a join — the cookie is not cut in
+    // half, and no second cookie appears.
+    expect(sentValue(1, "cookie")).toBe("placeholder-cookie-a=alpha");
+  });
+
+  it("with getSetCookie available, a cookie value with a comma, token and '=' is stored intact — the separator is never consulted", async () => {
+    queue.push(
+      canned({
+        setCookies: [
+          "placeholder-cookie-a=one,other=two; Path=/",
+          "placeholder-cookie-b=three; Path=/",
+        ],
+      }),
+      canned({ code: 200 }),
+    );
+    const transport = createFetchTransport();
+
+    await transport.send(plainRequest(URL_1));
+    await transport.send(plainRequest(URL_2));
+
+    // The accessor path returns the raw lines unchanged: the value containing
+    // a comma, token and '=' is stored intact, not cut into a spurious
+    // 'other' cookie.
+    expect(sentValue(1, "cookie")).toBe(
+      "placeholder-cookie-a=one,other=two; placeholder-cookie-b=three",
+    );
   });
 });
