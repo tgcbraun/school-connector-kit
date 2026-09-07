@@ -21,6 +21,12 @@
  * "node:" check looks at string literals in an import / export-from /
  * require context.
  *
+ * A bare specifier on the denylist is a violation rather than a skip:
+ * @school-connector-kit/transport is deliberately host-dependent (ADR-011
+ * decision 5), so a connector importing it would pull a DOM dependency into
+ * a bundle that must not have one, and the scan would never see it, because
+ * bare specifiers are not followed.
+ *
  * The scanner and its 11 control cases are a deliberate DUPLICATE of the
  * ones in packages/core/test/connector-contract.test.ts (per the package
  * brief): each connector package carries its own copy, rooted at its own
@@ -30,6 +36,19 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+
+const DENIED_BARE_SPECIFIERS = ["@school-connector-kit/transport"];
+
+/**
+ * A bare specifier the closure may not import at all. Bare specifiers are
+ * not followed by the scan, so a denied one is reported where it is found
+ * rather than by walking into it.
+ */
+function isDeniedBareSpecifier(spec: string): boolean {
+  return DENIED_BARE_SPECIFIERS.some(
+    (denied) => spec === denied || spec.startsWith(denied + "/"),
+  );
+}
 
 const FORBIDDEN_NAMES = [
   "window",
@@ -204,6 +223,23 @@ describe("scanner controls (kept positive/negative cases)", () => {
 // The rule: the transitive import closure from the package entry point
 // ---------------------------------------------------------------------------
 
+describe("bare specifier denylist (ADR-011 decision 5)", () => {
+  it("denies the transport package", () => {
+    expect(isDeniedBareSpecifier("@school-connector-kit/transport")).toBe(true);
+  });
+  it("denies a subpath of the transport package", () => {
+    expect(
+      isDeniedBareSpecifier("@school-connector-kit/transport/dist/index.js"),
+    ).toBe(true);
+  });
+  it("allows the core package", () => {
+    expect(isDeniedBareSpecifier("@school-connector-kit/core")).toBe(false);
+  });
+  it("allows a third-party package", () => {
+    expect(isDeniedBareSpecifier("zod")).toBe(false);
+  });
+});
+
 describe("entry-point closure scan (ADR-003 decision 9)", () => {
   const srcRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -237,7 +273,22 @@ describe("entry-point closure scan (ADR-003 decision 9)", () => {
       for (const lit of literals) {
         if (!isImporterContext(lit.before)) continue;
         const spec = lit.value;
-        if (!spec.startsWith("./") && !spec.startsWith("../")) continue; // bare specifiers are not followed
+        if (!spec.startsWith("./") && !spec.startsWith("../")) {
+          // Bare specifiers are not followed. A denied one is a violation in
+          // its own right: packages/transport is deliberately host-dependent
+          // (ADR-011 decision 5), so importing it from a connector pulls a DOM
+          // dependency into a bundle that must not have one, invisibly.
+          if (isDeniedBareSpecifier(spec)) {
+            problems.push({
+              kind: "import_specifier",
+              token: spec,
+              line: lineAt(src, lit.start),
+              file: rel,
+              via: viaHere,
+            });
+          }
+          continue;
+        }
         const target = path.resolve(
           path.dirname(abs),
           spec.replace(/\.js$/, ".ts"),
