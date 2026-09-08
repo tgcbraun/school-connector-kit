@@ -97,7 +97,7 @@ const CREDENTIALS = {
 /**
  * Login response: the evidence pins the login to HTTP 200 plus the
  * DSASESSID `Set-Cookie` (the session; the Transport's to keep). The body
- * is a plain JSON object which the connector reads nothing of — a fake
+ * is empty, because the connector reads nothing of it — a fake
  * `Set-Cookie` header is carried on the canned response so it looks like a
  * real one.
  */

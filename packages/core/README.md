@@ -137,8 +137,11 @@ G0–G8 keep these identifiers; earlier cross-references remain valid.
   workspace root).
 - Scripts: `build`, `generate-schema` (writes the committed JSON Schema),
   `test`, `typecheck`.
-- Regenerating the JSON Schema: `npm run generate-schema && npm test` —
-  the pinning test fails on any hand-edit or definition drift.
+- Regenerating the JSON Schema, from the repository root:
+  `pnpm --filter ./packages/core generate-schema && pnpm -r test` — the
+  pinning test fails on any hand-edit or definition drift. The package's own
+  `generate-schema` script shells out to `npm run build` internally; that is
+  the script's business and not a second command to run.
 
 ## What the tests claim, and do not claim (finding)
 
