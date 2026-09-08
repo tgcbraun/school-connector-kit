@@ -122,10 +122,12 @@ capture side.
 
 A connector's `logical_call` values must match those recorded in the
 platform's committed fixture rather than being retyped from the
-platform's documentation or invented at the call site, on the precedent
-of the WebUntis connector reading its `url_template` from the committed
-fixture. For Schulmanager the committed values are `get-letters`,
-`letter-mailing-setting` and `letter-detail`.
+platform's documentation or invented at the call site. The binding is to
+the committed record, not to the platform's vocabulary: unlike the
+WebUntis connector's `url_template`, which the capture records from the
+platform itself, two of Schulmanager's three values are labels chosen
+here rather than terms the platform emits. For Schulmanager the committed
+values are `get-letters`, `letter-mailing-setting` and `letter-detail`.
 
 **Consequence:** the capture model and the normalized envelope now carry the
 same field name with different validation owners. On the capture side

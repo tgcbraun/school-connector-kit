@@ -129,7 +129,10 @@ corpus reaches.
   `century_inferred: true`) pin Kikom Informationen's exact shape, so a
   platform stating a four-digit year cannot use DayOnly. Nothing in the
   corpus demands it yet.
-- Whether Message carries the new form. That is a connector decision.
+- ~~Whether Message carries the new form.~~ **Answered since this ADR was
+  accepted:** `Message.date` is a union of `DayOnly` and `PlatformInstant`,
+  and the Schulmanager connector emits the `PlatformInstant` branch against
+  live data.
 - Whether ADR-003's fetcher signature accommodates Schulmanager's N+1
   detail fetch. Unchanged from ADR-004.
 - Whether `readTimestamp` is nullable. It sits on `studentStatuses`, which

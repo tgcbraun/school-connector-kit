@@ -54,7 +54,7 @@ is a true statement about those platforms, not a missing value.
 
 **Reason:** requiring the field would force a value to be invented for three
 committed fixtures, and an invented identifier is exactly the kind of
-plausible-but-unevidenced content §48.4 struck from ADR-003.
+plausible-but-unevidenced content struck from ADR-003.
 
 **Consequence:** the three committed fixtures are unaffected — no rewrite, no
 migration, no `capture_format` bump. A reader encountering a capture without
@@ -128,10 +128,10 @@ envelope is observed, this decision is the one to revisit.
 - `tools/capture` changes in four files: the model, the CLI, and both test
   suites. The change is additive — no existing field moves.
 - Schulmanager capture is unblocked once this is accepted and implemented.
-  §54.5's gate closes.
+  The gate closes.
 - Gap register: this does not bind G9. Only a connector running against real
-  data does that (§42).
-- The privacy note at §54.4 is untouched. The login response carrying
+  data does that.
+- The privacy note is untouched. The login response carrying
   children's first names remains the highest-sensitivity response in the
   corpus, and its allowlist still needs care beyond the other three.
 
