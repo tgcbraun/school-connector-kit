@@ -150,8 +150,10 @@ export function createWebUntisConnector(
       );
     }
 
-    // The only conversion performed anywhere in this connector: drop the
-    // hyphens. No datetime arithmetic, no timezone, no Date construction.
+    // The only conversion performed on a window bound: drop the hyphens. No
+    // datetime arithmetic, no timezone, no Date construction here. The one
+    // `new Date` in this connector reads the injected clock for `captured_at`
+    // and touches no window bound and no row value.
     const startDate = fromInclusive.replace(/-/g, "");
     const endDate = toInclusive.replace(/-/g, "");
 

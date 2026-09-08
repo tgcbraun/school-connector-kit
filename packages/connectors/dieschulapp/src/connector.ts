@@ -360,7 +360,7 @@ export function createDieSchulAppConnector(
             }
           }
 
-          // Provenance for this row: ADR-001 decision 1 —
+          // Provenance for this row: ADR-009 decision 1 —
           // `source_record_id` is the entry's own id, stringified. There is
           // deliberately NO `occurrence` key here: on a weekly-template
           // platform the occurrence discriminator is `week_anchor.date`, and
