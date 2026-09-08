@@ -91,10 +91,10 @@ describe("committed JSON Schema document", () => {
     ]);
     expect(new Set(kinds).size).toBe(5);
   });
-  it("pins additionalProperties:false on the day-carrying forms (no time slot to add)", () => {
+  it("pins that the day-carrying forms declare no additionalProperties (input direction, ADR-012)", () => {
     const forms = committed().date_forms as Record<string, { additionalProperties?: boolean }>;
     for (const name of ["platform_date_int", "partial_day", "day_only"]) {
-      expect(forms[name]?.additionalProperties).toBe(false);
+      expect(forms[name]?.additionalProperties).toBeUndefined();
     }
   });
   it("pinned the weekday_slot anchor facts into the schema", () => {

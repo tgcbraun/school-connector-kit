@@ -30,7 +30,10 @@ export function zodVersion(): string {
 }
 
 function toJSONSchema(schema: z.ZodType): unknown {
-  return z.toJSONSchema(schema, { target: "draft-2020-12" });
+  // Input direction: the published document describes payloads a consumer may
+  // send, not the stripped result of parsing one. Plain z.object accepts and
+  // strips unknown keys, so only .strict() members render additionalProperties.
+  return z.toJSONSchema(schema, { target: "draft-2020-12", io: "input" });
 }
 
 /** Recursively copy to plain data with object keys sorted: canonical form. */
@@ -59,6 +62,7 @@ export function buildDocument(): Record<string, unknown> {
     generator: {
       api: "zod v4 z.toJSONSchema",
       zod_version: zodVersion(),
+      direction: "input",
     },
     json_schema_dialect: "https://json-schema.org/draft/2020-12/schema",
     concepts: {

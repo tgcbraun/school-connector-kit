@@ -2,7 +2,6 @@
   "concepts": {
     "assignment": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "completed": {
           "type": "boolean"
@@ -12,7 +11,6 @@
           "type": "string"
         },
         "due_date": {
-          "additionalProperties": false,
           "properties": {
             "kind": {
               "const": "platform_date_int",
@@ -34,7 +32,6 @@
           "type": "string"
         },
         "provenance": {
-          "additionalProperties": false,
           "properties": {
             "allowlist_version": {
               "type": "string"
@@ -54,7 +51,6 @@
               "type": "integer"
             },
             "request": {
-              "additionalProperties": false,
               "properties": {
                 "index": {
                   "maximum": 9007199254740991,
@@ -114,7 +110,6 @@
           "type": "object"
         },
         "reference_date": {
-          "additionalProperties": false,
           "properties": {
             "kind": {
               "const": "platform_date_int",
@@ -151,14 +146,12 @@
     },
     "event": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "concept": {
           "const": "event",
           "type": "string"
         },
         "date": {
-          "additionalProperties": false,
           "properties": {
             "day": {
               "maximum": 31,
@@ -203,7 +196,6 @@
           "type": "object"
         },
         "provenance": {
-          "additionalProperties": false,
           "properties": {
             "allowlist_version": {
               "type": "string"
@@ -223,7 +215,6 @@
               "type": "integer"
             },
             "request": {
-              "additionalProperties": false,
               "properties": {
                 "index": {
                   "maximum": 9007199254740991,
@@ -295,7 +286,6 @@
     },
     "message": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "body": {
           "type": "string"
@@ -307,7 +297,6 @@
         "date": {
           "oneOf": [
             {
-              "additionalProperties": false,
               "properties": {
                 "day": {
                   "maximum": 31,
@@ -329,7 +318,6 @@
                   "type": "integer"
                 },
                 "year_provenance": {
-                  "additionalProperties": false,
                   "properties": {
                     "century_inferred": {
                       "const": true,
@@ -367,7 +355,6 @@
               "type": "object"
             },
             {
-              "additionalProperties": false,
               "properties": {
                 "kind": {
                   "const": "platform_instant",
@@ -393,7 +380,6 @@
           "type": "integer"
         },
         "provenance": {
-          "additionalProperties": false,
           "properties": {
             "allowlist_version": {
               "type": "string"
@@ -413,7 +399,6 @@
               "type": "integer"
             },
             "request": {
-              "additionalProperties": false,
               "properties": {
                 "index": {
                   "maximum": 9007199254740991,
@@ -485,7 +470,6 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "oneOf": [
         {
-          "additionalProperties": false,
           "properties": {
             "concept": {
               "const": "timetable_entry",
@@ -512,14 +496,12 @@
                       "type": "string"
                     },
                     "student": {
-                      "additionalProperties": false,
                       "properties": {
                         "concept": {
                           "const": "student_reference",
                           "type": "string"
                         },
                         "provenance": {
-                          "additionalProperties": false,
                           "properties": {
                             "allowlist_version": {
                               "type": "string"
@@ -539,7 +521,6 @@
                               "type": "integer"
                             },
                             "request": {
-                              "additionalProperties": false,
                               "properties": {
                                 "index": {
                                   "maximum": 9007199254740991,
@@ -610,7 +591,6 @@
                       "type": "object"
                     },
                     "subject": {
-                      "additionalProperties": false,
                       "properties": {
                         "acronym": {
                           "type": "string"
@@ -625,7 +605,6 @@
                       "type": "object"
                     },
                     "week_anchor": {
-                      "additionalProperties": false,
                       "properties": {
                         "date": {
                           "format": "date",
@@ -689,7 +668,6 @@
               ]
             },
             "provenance": {
-              "additionalProperties": false,
               "properties": {
                 "allowlist_version": {
                   "type": "string"
@@ -709,7 +687,6 @@
                   "type": "integer"
                 },
                 "request": {
-                  "additionalProperties": false,
                   "properties": {
                     "index": {
                       "maximum": 9007199254740991,
@@ -777,7 +754,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "completed": {
               "type": "boolean"
@@ -787,7 +763,6 @@
               "type": "string"
             },
             "due_date": {
-              "additionalProperties": false,
               "properties": {
                 "kind": {
                   "const": "platform_date_int",
@@ -809,7 +784,6 @@
               "type": "string"
             },
             "provenance": {
-              "additionalProperties": false,
               "properties": {
                 "allowlist_version": {
                   "type": "string"
@@ -829,7 +803,6 @@
                   "type": "integer"
                 },
                 "request": {
-                  "additionalProperties": false,
                   "properties": {
                     "index": {
                       "maximum": 9007199254740991,
@@ -889,7 +862,6 @@
               "type": "object"
             },
             "reference_date": {
-              "additionalProperties": false,
               "properties": {
                 "kind": {
                   "const": "platform_date_int",
@@ -925,14 +897,12 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "concept": {
               "const": "event",
               "type": "string"
             },
             "date": {
-              "additionalProperties": false,
               "properties": {
                 "day": {
                   "maximum": 31,
@@ -977,7 +947,6 @@
               "type": "object"
             },
             "provenance": {
-              "additionalProperties": false,
               "properties": {
                 "allowlist_version": {
                   "type": "string"
@@ -997,7 +966,6 @@
                   "type": "integer"
                 },
                 "request": {
-                  "additionalProperties": false,
                   "properties": {
                     "index": {
                       "maximum": 9007199254740991,
@@ -1068,7 +1036,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "body": {
               "type": "string"
@@ -1080,7 +1047,6 @@
             "date": {
               "oneOf": [
                 {
-                  "additionalProperties": false,
                   "properties": {
                     "day": {
                       "maximum": 31,
@@ -1102,7 +1068,6 @@
                       "type": "integer"
                     },
                     "year_provenance": {
-                      "additionalProperties": false,
                       "properties": {
                         "century_inferred": {
                           "const": true,
@@ -1140,7 +1105,6 @@
                   "type": "object"
                 },
                 {
-                  "additionalProperties": false,
                   "properties": {
                     "kind": {
                       "const": "platform_instant",
@@ -1166,7 +1130,6 @@
               "type": "integer"
             },
             "provenance": {
-              "additionalProperties": false,
               "properties": {
                 "allowlist_version": {
                   "type": "string"
@@ -1186,7 +1149,6 @@
                   "type": "integer"
                 },
                 "request": {
-                  "additionalProperties": false,
                   "properties": {
                     "index": {
                       "maximum": 9007199254740991,
@@ -1255,14 +1217,12 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "concept": {
               "const": "student_reference",
               "type": "string"
             },
             "provenance": {
-              "additionalProperties": false,
               "properties": {
                 "allowlist_version": {
                   "type": "string"
@@ -1282,7 +1242,6 @@
                   "type": "integer"
                 },
                 "request": {
-                  "additionalProperties": false,
                   "properties": {
                     "index": {
                       "maximum": 9007199254740991,
@@ -1356,7 +1315,6 @@
     },
     "provenance_envelope": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "allowlist_version": {
           "type": "string"
@@ -1376,7 +1334,6 @@
           "type": "integer"
         },
         "request": {
-          "additionalProperties": false,
           "properties": {
             "index": {
               "maximum": 9007199254740991,
@@ -1437,14 +1394,12 @@
     },
     "student_reference": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "concept": {
           "const": "student_reference",
           "type": "string"
         },
         "provenance": {
-          "additionalProperties": false,
           "properties": {
             "allowlist_version": {
               "type": "string"
@@ -1464,7 +1419,6 @@
               "type": "integer"
             },
             "request": {
-              "additionalProperties": false,
               "properties": {
                 "index": {
                   "maximum": 9007199254740991,
@@ -1536,7 +1490,6 @@
     },
     "timetable_entry": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "concept": {
           "const": "timetable_entry",
@@ -1563,14 +1516,12 @@
                   "type": "string"
                 },
                 "student": {
-                  "additionalProperties": false,
                   "properties": {
                     "concept": {
                       "const": "student_reference",
                       "type": "string"
                     },
                     "provenance": {
-                      "additionalProperties": false,
                       "properties": {
                         "allowlist_version": {
                           "type": "string"
@@ -1590,7 +1541,6 @@
                           "type": "integer"
                         },
                         "request": {
-                          "additionalProperties": false,
                           "properties": {
                             "index": {
                               "maximum": 9007199254740991,
@@ -1661,7 +1611,6 @@
                   "type": "object"
                 },
                 "subject": {
-                  "additionalProperties": false,
                   "properties": {
                     "acronym": {
                       "type": "string"
@@ -1676,7 +1625,6 @@
                   "type": "object"
                 },
                 "week_anchor": {
-                  "additionalProperties": false,
                   "properties": {
                     "date": {
                       "format": "date",
@@ -1740,7 +1688,6 @@
           ]
         },
         "provenance": {
-          "additionalProperties": false,
           "properties": {
             "allowlist_version": {
               "type": "string"
@@ -1760,7 +1707,6 @@
               "type": "integer"
             },
             "request": {
-              "additionalProperties": false,
               "properties": {
                 "index": {
                   "maximum": 9007199254740991,
@@ -1833,7 +1779,6 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "oneOf": [
         {
-          "additionalProperties": false,
           "properties": {
             "kind": {
               "const": "platform_date_int",
@@ -1852,7 +1797,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "end_time": {
               "type": "string"
@@ -1870,7 +1814,6 @@
               "type": "string"
             },
             "week_anchor": {
-              "additionalProperties": false,
               "properties": {
                 "date": {
                   "format": "date",
@@ -1909,7 +1852,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "day": {
               "maximum": 31,
@@ -1954,7 +1896,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "day": {
               "maximum": 31,
@@ -1976,7 +1917,6 @@
               "type": "integer"
             },
             "year_provenance": {
-              "additionalProperties": false,
               "properties": {
                 "century_inferred": {
                   "const": true,
@@ -2014,7 +1954,6 @@
           "type": "object"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "kind": {
               "const": "platform_instant",
@@ -2036,7 +1975,6 @@
     },
     "day_only": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "day": {
           "maximum": 31,
@@ -2058,7 +1996,6 @@
           "type": "integer"
         },
         "year_provenance": {
-          "additionalProperties": false,
           "properties": {
             "century_inferred": {
               "const": true,
@@ -2097,7 +2034,6 @@
     },
     "partial_day": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "day": {
           "maximum": 31,
@@ -2143,7 +2079,6 @@
     },
     "platform_date_int": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "platform_date_int",
@@ -2163,7 +2098,6 @@
     },
     "platform_instant": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "platform_instant",
@@ -2183,7 +2117,6 @@
     },
     "weekday_slot": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false,
       "properties": {
         "end_time": {
           "type": "string"
@@ -2201,7 +2134,6 @@
           "type": "string"
         },
         "week_anchor": {
-          "additionalProperties": false,
           "properties": {
             "date": {
               "format": "date",
@@ -2242,6 +2174,7 @@
   },
   "generator": {
     "api": "zod v4 z.toJSONSchema",
+    "direction": "input",
     "zod_version": "4.5.4"
   },
   "json_schema_dialect": "https://json-schema.org/draft/2020-12/schema",
