@@ -73,8 +73,8 @@ recorded here):
 ## Provenance
 
 - Reviewed by a human as part of the school-connector-kit privacy review
-  process (Phase 6 passed); the checklist in `fixtures/README.md`
-  applies.
+  process, on the date recorded at the head of this file; the human review
+  checklist in `fixtures/README.md` applies and every item held.
 - `private-fixtures/dieschulapp/` holds the private originals and the
   private fetch/analysis tooling; this directory stands alone and needs
   no access to them.

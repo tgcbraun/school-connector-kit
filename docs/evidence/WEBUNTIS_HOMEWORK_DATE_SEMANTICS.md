@@ -1,9 +1,10 @@
-# WebUntis homework date semantics — private evidence (round 1)
+# WebUntis homework date semantics (round 1)
 
-Status: private working evidence. Contains **no real values** (no homework
-text, no person or school identifiers, no IDs, no URLs with codes).
-Not committed, not shareable as-is; the shareable form is the redacted
-capture produced from it (private: `private-fixtures/webuntis/`).
+Status: committed evidence, derived facts only. Contains **no real values**
+(no homework text, no person or school identifiers, no IDs, no URLs with
+codes). The private originals it was derived from stay in
+`private-fixtures/webuntis/`, which is git-ignored; this document stands
+alone and needs no access to them.
 
 ## Endpoint
 

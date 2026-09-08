@@ -66,6 +66,7 @@ facts only — no values were recorded here):
 ## Provenance
 
 - Reviewed by a human as part of the school-connector-kit privacy review
-  process (Phase 5 passed); the checklist in `fixtures/README.md` applies.
+  process, on the date recorded at the head of this file; the human review
+  checklist in `fixtures/README.md` applies and every item held.
 - `private-fixtures/webuntis/` holds the private originals and the private
   evidence notes; this directory stands alone and needs no access to them.
