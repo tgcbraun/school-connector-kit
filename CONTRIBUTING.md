@@ -49,6 +49,23 @@ install`) worked there. This observation is environment-specific and was not
 verified beyond that one machine; if `pnpm install` cannot run on your
 machine, check the pnpm / corepack setup first.
 
+## Verifying your changes
+
+Run the full check before opening a pull request:
+
+```
+pnpm verify
+```
+
+That builds the core package, typechecks every package, and runs the test suite,
+in that order. The order matters: `packages/core` publishes its types from
+`dist/`, which is not committed, so the connector packages and the transport
+package cannot be typechecked or tested until core has been built. Running
+`pnpm -r typecheck` on a fresh clone without building first reports missing
+modules in every package that imports the core package by name.
+
+The same three steps run in CI on every pull request.
+
 ## Evidence tiers
 
 Three evidence tiers are distinguished, and they must not be conflated:

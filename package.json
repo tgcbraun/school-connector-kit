@@ -9,6 +9,10 @@
   "engines": {
     "node": ">=22"
   },
+  "scripts": {
+    "build": "pnpm --filter ./packages/core build",
+    "verify": "pnpm run build && pnpm -r typecheck && pnpm -r test"
+  },
   "devDependencies": {
     "@types/node": "^26.4.0",
     "typescript": "^7.0.2",
