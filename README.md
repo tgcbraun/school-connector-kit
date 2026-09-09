@@ -6,7 +6,7 @@ An open-source toolkit for integrating digital services used by schools in Germa
 
 Early development.
 
-The privacy-safe capture tooling is complete, and three structurally redacted, fully human-reviewed fixtures are committed (one per platform: WebUntis, DieSchulApp, and KIKOM). The normalized data model is schema 0.1, which is pre-1.0 and breaking changes are still expected. The connector runtime contract is committed and recorded in ADR-003 (`docs/architecture/ADR-003-CONNECTOR-RUNTIME-CONTRACT.md`). No connector implementations exist yet.
+The privacy-safe capture tooling is complete, and four structurally redacted, fully human-reviewed fixtures are committed, one per platform: WebUntis, Schulmanager Online, DieSchulApp, and KIKOM. The normalized data model is schema 0.1, which is pre-1.0 and breaking changes are still expected. The connector runtime contract is committed and recorded in ADR-003 (`docs/architecture/ADR-003-CONNECTOR-RUNTIME-CONTRACT.md`). Three connectors are implemented and published: WebUntis, Schulmanager Online, and DieSchulApp. Each has been run against live platform data. The host-side Transport that connectors receive is published as `packages/transport` and is recorded in ADR-011 (`docs/architecture/ADR-011-THE-PUBLISHED-TRANSPORT.md`).
 
 ## Getting started
 
@@ -14,12 +14,10 @@ Node.js >= 22 is required, and the repository pins `packageManager` to `pnpm@11.
 
 ```
 pnpm install
-pnpm -r typecheck
-pnpm -r build
-pnpm -r test
+pnpm verify
 ```
 
-`pnpm -r typecheck` passes with zero diagnostics. `pnpm -r test` runs 72 tests in `packages/core` and 158 tests in `tools/capture`.
+`pnpm verify` builds the core package, typechecks every package, then runs the test suite: 398 tests across six packages. The build must come first, because `packages/core` publishes its types from `dist/`, which is not committed.
 
 ## Germany-first
 
@@ -84,10 +82,11 @@ Capture tooling follows a deny-by-default approach: values may only leave a capt
 ## Repository structure
 
 - `packages/core/` - shared connector contract and normalized models
-- `packages/connectors/` - platform-specific connectors (none yet; the directory is empty)
+- `packages/connectors/` - platform-specific connectors: WebUntis, Schulmanager Online, DieSchulApp
+- `packages/transport/` - the host-side Transport connectors receive (ADR-011)
 - `tools/` - developer utilities, including privacy-safe capture tooling
 - `schemas/` - placeholder (README only); the generated JSON Schema for schema 0.1 lives in `packages/core/schema/`
-- `tests/contract/` - placeholder (README only); it will hold connector conformance tests once a connector exists
+- `tests/contract/` - placeholder (README only); shared conformance tests are not written yet
 - `docs/` - architecture and contributor documentation
 - `examples/` - synthetic examples only
 
