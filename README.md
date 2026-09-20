@@ -17,7 +17,7 @@ pnpm install
 pnpm verify
 ```
 
-`pnpm verify` builds the core package, typechecks every package, then runs the test suite: 398 tests across six packages. The build must come first, because `packages/core` publishes its types from `dist/`, which is not committed.
+`pnpm verify` builds the core package, typechecks every package, then runs the test suite: 401 tests across six packages. The build must come first, because `packages/core` publishes its types from `dist/`, which is not committed.
 
 ## Germany-first
 
